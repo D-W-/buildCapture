@@ -1,0 +1,8 @@
+# bin file
+**/bin/
+
+.fatjar
+.classpath
+.project
+
+guava*
