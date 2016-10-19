@@ -57,33 +57,44 @@ public class ParameterHandler {
 		return command;
 	}
 	
+	/*
+	 * @command: 用户的输入命令(在这里应该就是cd 和 make), 后续可以改一下接口
+	 * 先进行用户要求的make,并将输出存到 output 这个文件里面,以供后续处理
+		修改1: 做了更改,原来是直接执行一个语句,但是 TO 项目无法退出(shell 下面使可以退出的)
+		现在放到一个脚本里面执行 可以了
+		修改2: 当正常make抓取不到时, 尝试使shell在执行语句之前先输出expanding的语句的操作
+		原来的输出存储不变, 但是增加了抓取不到的时候读的文件 /.process_makefile/all
+	 */
 	public boolean make(String command){
-//		先进行用户要求的make,并将输出存到 output 这个文件里面,以供后续处理
-//		做了更改,原来是直接执行一个语句,但是 TO 项目无法退出(shell 下面使可以退出的)
-//		现在放到一个脚本里面执行 可以了
-		command += (" > " + folderName + "/.process_makefile/output");
+		File tempFile = new File(folderName + "/Makefile");
+//		判断makefile or Makefile
+		if(tempFile.exists()){
+			command = command + (" \"SHELL=sh -xv\" -f Makefile &>" + folderName + "/.process_makefile/all >" 
+					+ folderName + "/.process_makefile/output");
+		} else {
+			command = command + (" \"SHELL=sh -xv\" -f makefile &>" + folderName + "/.process_makefile/all >" 
+					+ folderName + "/.process_makefile/output");
+		}
 		String[] commands = {command};
 		return Execute.executeCommands(commands);
 	}
 	
-	public boolean makewithExpand(String command){
-//		这个方法是当正常make抓取不到时, 尝试使shell在执行语句之前先输出expanding的语句的操作
-//		但是	1.需要抓取标准错误
-//			2.需要去掉每行前面的加号
-
-//		抓取标准错误
-		command += (" \"SHELL=sh -xv\" -f Makefile >" + folderName + "/.process_makefile/output 2>&1");
-		String[] commands = {command};
-		boolean result = Execute.executeCommands(commands);
-//		去掉每行之前的加号
-		parseOutput();
-		return result;
-	}
-	
-	private void parseOutput(){
-//		去掉每行之前的加号
+/*
+ * 	这个方法是当正常make抓取不到时, 尝试针对all文件进行抓取处理的操作
+ *      1.需要去掉每行前面的加号
+ *      2.需要去掉无用的行(空行 #开头的行)
+ */
+	public void captureFromAll() {
+//		rename all to output and store output to output.old
 		String outputfileName = folderName + "/.process_makefile/output";
+		File output = new File(outputfileName);
+		File oldOutput = new File(outputfileName + ".old"); 
+		output.renameTo(oldOutput);
+		String allName = folderName + "/.process_makefile/all";
+		File all = new File(allName);
+		all.renameTo(output);
 		String tmpfileName = outputfileName + ".tmp";
+		
 		BufferedReader br = null;
 	    BufferedWriter bw = null;
 	      try {
@@ -91,10 +102,15 @@ public class ParameterHandler {
 	         bw = new BufferedWriter(new FileWriter(tmpfileName));
 	         String line;
 	         while ((line = br.readLine()) != null) {
-	            if (line.length() > 0 && line.charAt(0) == '+')
-	               line = line.substring(1);
-//	            TODO: line processing
-	            bw.write(line+"\n");
+	            if (line.length() > 0) {
+	            	if(line.charAt(0) == '+') {
+//		        		去掉每行之前的加号
+		            	line = line.substring(2);
+		            	bw.write(line+"\n");
+	            	} else if(line.startsWith("make")) {
+	            		bw.write(line+"\n");
+	            	}
+	            }
 	         }
 	      } catch (Exception e) {
 	         return;

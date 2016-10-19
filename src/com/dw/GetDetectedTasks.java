@@ -439,37 +439,32 @@ public class GetDetectedTasks {
 		if(!dirStack.empty())
 			currentFolder = dirStack.lastElement();
 		
-//		处理 -c -S 的情况
-		matcher = pattern_cS.matcher(line);
-		if(matcher.find()){
-			return getPreprocessedFiles(line,currentFolder,"");
+//		开头得是 cc 或者 gcc
+		matcher = pattern_startWithCC.matcher(line);
+		if(matcher.matches()){
+//			处理 -c -S 的情况
+			matcher = pattern_cS.matcher(line);
+			if(matcher.find()){
+				return getPreprocessedFiles(line,currentFolder,"");
+			}		
+//			处理 -shared 命令的情况
+			matcher = pattern_sharedlib.matcher(line);
+			if(matcher.find()){
+				getSharedMap(line, currentFolder);
+				return result;
+			}
+//			处理得到可执行文件的情况
+			matcher = pattern_nonExecutive.matcher(line);
+			if(!matcher.find()){
+				return getTasks(line,currentFolder);
+			}
 		}
-		
-
 		
 //		处理 ar 命令的情况
 		matcher = pattern_startWithAr.matcher(line);
 		if(matcher.find()){
 			getLibMap(line, currentFolder);
 			return result;
-		}
-		
-
-//		处理 -shared 命令的情况
-		matcher = pattern_sharedlib.matcher(line);
-		if(matcher.find()){
-			getSharedMap(line, currentFolder);
-			return result;
-		}
-		
-//		处理得到可执行文件的情况
-		matcher = pattern_nonExecutive.matcher(line);
-		if(!matcher.find()){
-			matcher = pattern_startWithCC.matcher(line);
-			if(matcher.matches()){
-//				开头得是 cc 或者 gcc
-				return getTasks(line,currentFolder);
-			}
 		}
 		
 //		其他情况不做处理,返回空行

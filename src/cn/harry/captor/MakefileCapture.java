@@ -58,13 +58,10 @@ public class MakefileCapture {
 			getDetectTasks.deal();
 			tasks = getDetectTasks.getTaskList();
 			
-//			增加处理流程, 如果抓取不到任何tasks, 尝试关闭silent选项(打开verbose选项)
+//			增加处理流程, 如果标准输出抓取不到任何tasks, 尝试读取关闭silent选项(打开verbose选项)的all文件进行抓取
 			if(tasks.isEmpty()){
-				clean();
-//				重新make并抓取处理
-				rootFolder.mkdir();
-				command = "cd " + makeFolder + " && make";
-				parameterHandler.makewithExpand(command);
+//				针对all文件进行抓取
+				parameterHandler.captureFromAll();
 //				重新尝试获取tasks
 				getDetectTasks.deal();
 				tasks = getDetectTasks.getTaskList();
