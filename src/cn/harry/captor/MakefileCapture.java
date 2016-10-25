@@ -104,7 +104,7 @@ public class MakefileCapture {
 	 * 从json文件中恢复出tasks
 	 *  @param jsonFilePath: json文件存储的地址
 	 */
-	public List<List<String>> getTasksFromJson(String jsonFilePath){
+	public static List<List<String>> getTasksFromJson(String jsonFilePath){
 	    Type myType = new TypeToken<LinkedList<LinkedList<String>>>(){}.getType();
 		try {
 			JsonReader reader = new JsonReader(new FileReader(jsonFilePath));
