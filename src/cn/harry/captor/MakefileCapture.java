@@ -2,13 +2,23 @@ package cn.harry.captor;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.dw.GetDetectedTasks;
 import com.dw.ParameterHandler;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import com.util.Execute;
 
 public class MakefileCapture {
@@ -66,10 +76,43 @@ public class MakefileCapture {
 				getDetectTasks.deal();
 				tasks = getDetectTasks.getTaskList();
 			}
-			
+//			将tasks存储为json文件
+			storeTasksToJson(outFolder + "/tasks.json");
 			return true;
 		}
 		return false;
+	}
+	
+	/*
+	 * 将tasks存储为json文件
+	 * @param jsonFilePath: json文件存储的地址
+	 */
+	private void storeTasksToJson(String jsonFilePath){
+	    //    写文件
+	    Type myType = new TypeToken<LinkedList<LinkedList<String>>>(){}.getType();
+		try {
+			JsonWriter writer = new JsonWriter(new FileWriter(jsonFilePath));
+			Gson gson = new GsonBuilder().create();
+			gson.toJson(tasks, myType, writer);
+			writer.flush();
+		} catch (IOException e) {
+			throw new RuntimeException("output transform to json failed");
+		}
+	}
+
+	/*
+	 * 从json文件中恢复出tasks
+	 *  @param jsonFilePath: json文件存储的地址
+	 */
+	public List<List<String>> getTasksFromJson(String jsonFilePath){
+	    Type myType = new TypeToken<LinkedList<LinkedList<String>>>(){}.getType();
+		try {
+			JsonReader reader = new JsonReader(new FileReader(jsonFilePath));
+			tasks = new Gson().fromJson(reader, myType);
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException("json to tasks failed");
+		}
+		return tasks;
 	}
 	
 	/**
