@@ -383,7 +383,7 @@ public class GetDetectedTasks {
 	public void getLibMap(String line,String currentFolder){
 //		处理 ar 指令,提取出输入文件 .o 和输出文件 .a 存绝对路径
 		String[] partStrings = line.split(" ");
-		if(partStrings.length <= 4){
+		if(partStrings.length < 4){
 			return ;
 		}
 		String outputFilename = toAbsolutePath(currentFolder, partStrings[2]);

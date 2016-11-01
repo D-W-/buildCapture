@@ -14,7 +14,7 @@ public class MakefileCaptureBuilder {
 	}
 	
 	public static void main(String[] args){
-		String makefolder = "/home/harry/learn/learnGCC";
+		String makefolder = "/home/harry/code/gzip-1.8";
 		MakefileCapture makefileCapture = getCaptor(makefolder, makefolder);
 		makefileCapture.make();
 //		String outFolder = makefolder + "/.process_makefile";

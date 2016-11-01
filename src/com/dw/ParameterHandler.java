@@ -69,13 +69,13 @@ public class ParameterHandler {
 		File tempFile = new File(folderName + "/Makefile");
 //		判断makefile or Makefile
 		if(tempFile.exists()){
-			command = command + (" \"SHELL=sh -xv\" -f Makefile &>" + folderName + "/.process_makefile/all >" 
-					+ folderName + "/.process_makefile/output");
+			command = command + (" \"SHELL=sh -xv\" -f Makefile &> " + folderName + "/.process_makefile/all ");
+//					+ folderName + "/.process_makefile/output");
 		} else {
-			command = command + (" \"SHELL=sh -xv\" -f makefile &>" + folderName + "/.process_makefile/all >" 
-					+ folderName + "/.process_makefile/output");
+			command = command + (" \"SHELL=sh -xv\" -f makefile &> " + folderName + "/.process_makefile/all " );
+//					+ folderName + "/.process_makefile/output");
 		}
-		String[] commands = {command};
+		String[] commands = {command, "cp " + folderName + "/.process_makefile/all " + folderName + "/.process_makefile/output"};
 		return Execute.executeCommands(commands);
 	}
 	
