@@ -14,9 +14,9 @@ public class MakefileCaptureBuilder {
 	}
 	
 	public static void main(String[] args){
-		String makefolder = "/home/harry/code/gzip-1.8";
+		String makefolder = "/home/harry/code/bash/versions.alt/versions.orig/v6";
 		MakefileCapture makefileCapture = getCaptor(makefolder, makefolder);
-		makefileCapture.make();
+		makefileCapture.make("make");
 //		String outFolder = makefolder + "/.process_makefile";
 //		GetDetectedTasks getDetectTasks = new GetDetectedTasks(makefolder,outFolder);
 //		getDetectTasks.deal();

@@ -41,7 +41,7 @@ public class MakefileCapture {
 		_outputDirectory = projectDirectory;
 	}
 	
-	public boolean make(){
+	public boolean make(String makeCommand){
 //    编译并抓取
 		if(_projectDirectory != null && !_projectDirectory.equals("")){
 			String makeFolder = _projectDirectory;
@@ -55,8 +55,11 @@ public class MakefileCapture {
 				outFolder = System.getProperty("user.home") + outFolder.substring(1);
 			}
 			
+			if(makeCommand == null || makeCommand.equals("")) {
+				makeCommand = "make";
+			}
 //			对工程执行make，并抓取输出
-			String command = "cd " + makeFolder + " && make";
+			String command = "cd " + makeFolder + " && " + makeCommand;
 			ParameterHandler parameterHandler = new ParameterHandler(outFolder);
 			outFolder += "/.process_makefile";
 			File rootFolder = new File(outFolder);
@@ -133,7 +136,7 @@ public class MakefileCapture {
 		}
 	}
 	
-	public  boolean makeWithPath(String path){
+	public  boolean makeWithPath(String path, String makeCommand){
 //		增加环境变量path
 		ArrayList<String> items = new ArrayList<String>();
 //		从文件中读取
@@ -153,7 +156,7 @@ public class MakefileCapture {
 //		最后需要转换成 array
 		Execute.paths = new String[items.size()];
 		Execute.paths = items.toArray(Execute.paths);
-		return make();
+		return make(makeCommand);
 	}
 
 	public  void makeClean(){
@@ -162,18 +165,18 @@ public class MakefileCapture {
 			Execute.executeCommand("cd " + _projectDirectory + " && make clean");
 	}
 
-	public boolean makeWithPathCleanO(String path){
+	public boolean makeWithPathCleanO(String path, String makeCommand){
 //		带有路径地 run 完 clean 所有的 .o 文件
-		boolean result = makeWithPath(path);
+		boolean result = makeWithPath(path, makeCommand);
 		if(result){
 			makeClean();
 		}
 		return result;
 	}
 	
-	public boolean makeCleanPointO(){
+	public boolean makeCleanPointO(String makeCommand){
 //		run 完之后 clean 所有的 .o 文件
-		boolean result = make();
+		boolean result = make(makeCommand);
 		if(result){
 			makeClean();
 		}
