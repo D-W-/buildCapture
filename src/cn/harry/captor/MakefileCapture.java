@@ -41,6 +41,10 @@ public class MakefileCapture {
 		_outputDirectory = projectDirectory;
 	}
 	
+	public boolean make(){
+		return make(null);
+	}
+	
 	public boolean make(String makeCommand){
 //    编译并抓取
 		if(_projectDirectory != null && !_projectDirectory.equals("")){
