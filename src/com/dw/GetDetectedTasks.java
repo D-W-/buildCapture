@@ -45,8 +45,8 @@ public class GetDetectedTasks {
 	Pattern pattern_sorcefileSuffix = Pattern.compile(".[c|cc|C|cxx|cpp]$");
 	Pattern pattern_startWithAr = Pattern.compile("^\\s*([/a-z0-9-_]*-)?ar ");
 	Pattern pattern_sharedlib = Pattern.compile(" -shared ");
-	Pattern intoFolder = Pattern.compile("Entering directory '([^']+)'");
-	Pattern outofFolder = Pattern.compile("Leaving directory '([^']+)'");
+	Pattern intoFolder = Pattern.compile("Entering directory ['\"`]([^']+)['\"`]");
+	Pattern outofFolder = Pattern.compile("Leaving directory ['\"`]([^']+)['\"`]");
 //	当前文件路径 由输入文件指定
 	String abslutePath = System.getProperty("user.dir") + '/';
 	
@@ -420,8 +420,9 @@ public class GetDetectedTasks {
 		lineNumber++;
 		String result = "";
 //		处理之前应该先把双引号换成空格, 防止文件名出错
-		line = line.replace('\"', ' ');
-		line = line.replace('`', '\'');
+//		修改了正则表达式而不是修改抓取结果, 防止将gcc语句中的"替换掉
+//		line = line.replace('\"', ' ');
+//		line = line.replace('`', '\'');
 //		处理文件夹的切换,每遇到进入一个文件夹就进栈,离开一个文件夹就弹栈
 		Matcher matcher = intoFolder.matcher(line);
 		if(matcher.find()){

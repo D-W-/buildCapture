@@ -1,5 +1,7 @@
 package cn.harry.builder;
 
+import com.dw.GetDetectedTasks;
+
 //import com.dw.GetDetectedTasks;
 
 import cn.harry.captor.MakefileCapture;
@@ -14,9 +16,12 @@ public class MakefileCaptureBuilder {
 	}
 	
 	public static void main(String[] args){
-		String makefolder = "/home/harry/code/bash/versions.alt/versions.orig/v6";
+		String makefolder = "/home/harry/code/dovecot-1.2.17";
 		MakefileCapture makefileCapture = getCaptor(makefolder, makefolder);
 		makefileCapture.make("make");
+		
+//		GetDetectedTasks getDetectTasks = new GetDetectedTasks(makefolder,makefolder + "/.process_makefile");
+//		getDetectTasks.deal();
 //		String outFolder = makefolder + "/.process_makefile";
 //		GetDetectedTasks getDetectTasks = new GetDetectedTasks(makefolder,outFolder);
 //		getDetectTasks.deal();
