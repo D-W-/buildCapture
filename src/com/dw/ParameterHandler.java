@@ -64,19 +64,24 @@ public class ParameterHandler {
 		现在放到一个脚本里面执行 可以了
 		修改2: 当正常make抓取不到时, 尝试使shell在执行语句之前先输出expanding的语句的操作
 		原来的输出存储不变, 但是增加了抓取不到的时候读的文件 /.process_makefile/all
+		修改3: 增加选项, 可以指定脚本
 	 */
-	public boolean make(String command){
+	public boolean make(String command, String shell){
 		File tempFile = new File(folderName + "/Makefile");
 //		判断makefile or Makefile
 		if(tempFile.exists()){
-			command = command + (" \"SHELL=sh -xv\" -f Makefile &> " + folderName + "/.process_makefile/all ");
+			command = command + (" \"SHELL=" + shell + " -xv\" -f Makefile &> " + folderName + "/.process_makefile/all ");
 //					+ folderName + "/.process_makefile/output");
 		} else {
-			command = command + (" \"SHELL=sh -xv\" -f makefile &> " + folderName + "/.process_makefile/all " );
+			command = command + (" \"SHELL=" + shell + " -xv\" -f makefile &> " + folderName + "/.process_makefile/all " );
 //					+ folderName + "/.process_makefile/output");
 		}
 		String[] commands = {command, "cp " + folderName + "/.process_makefile/all " + folderName + "/.process_makefile/output"};
 		return Execute.executeCommands(commands);
+	}
+	
+	public boolean make(String command) {
+		return make(command, "sh");
 	}
 	
 /*

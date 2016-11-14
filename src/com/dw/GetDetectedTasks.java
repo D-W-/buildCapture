@@ -443,6 +443,9 @@ public class GetDetectedTasks {
 //		开头得是 cc 或者 gcc
 		matcher = pattern_startWithCC.matcher(line);
 		if(matcher.matches()){
+			if(line.endsWith("'")){
+				return result;
+			}
 //			处理 -c -S 的情况
 			matcher = pattern_cS.matcher(line);
 			if(matcher.find()){

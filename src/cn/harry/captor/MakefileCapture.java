@@ -28,6 +28,8 @@ public class MakefileCapture {
 	private  String _projectDirectory = null;
 	private String _outputDirectory = null;
 	
+	public static final String SHELL = "sh";
+	
 //	public static HashMap<String, List<String>> taskMap;
 	public static List<List<String>> tasks;
 	
@@ -45,7 +47,11 @@ public class MakefileCapture {
 		return make(null);
 	}
 	
-	public boolean make(String makeCommand){
+	public boolean make(String makeCommand) {
+		return make(makeCommand, SHELL);
+	}
+	
+	public boolean make(String makeCommand, String shell){
 //    编译并抓取
 		if(_projectDirectory != null && !_projectDirectory.equals("")){
 			String makeFolder = _projectDirectory;
@@ -68,7 +74,7 @@ public class MakefileCapture {
 			outFolder += "/.process_makefile";
 			File rootFolder = new File(outFolder);
 			rootFolder.mkdir();
-			parameterHandler.make(command);
+			parameterHandler.make(command, shell);
 			
 //			输入一个 output 文件,执行输出增加 -E 选项
 			GetDetectedTasks getDetectTasks = new GetDetectedTasks(makeFolder,outFolder);

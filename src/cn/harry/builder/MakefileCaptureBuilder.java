@@ -18,7 +18,7 @@ public class MakefileCaptureBuilder {
 	public static void main(String[] args){
 		String makefolder = "/home/harry/code/dovecot-1.2.17";
 		MakefileCapture makefileCapture = getCaptor(makefolder, makefolder);
-		makefileCapture.make("make");
+		makefileCapture.make("make", "/bin/bash");
 		
 //		GetDetectedTasks getDetectTasks = new GetDetectedTasks(makefolder,makefolder + "/.process_makefile");
 //		getDetectTasks.deal();
