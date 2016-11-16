@@ -73,6 +73,11 @@ public class MakefileCapture {
 			ParameterHandler parameterHandler = new ParameterHandler(outFolder);
 			outFolder += "/.process_makefile";
 			File rootFolder = new File(outFolder);
+			try {
+				outFolder = rootFolder.getCanonicalPath();
+			} catch (IOException e) {
+				throw new RuntimeException("Path Error" + e.toString());
+			}
 			rootFolder.mkdir();
 			parameterHandler.make(command, shell);
 			
