@@ -76,8 +76,15 @@ public class ParameterHandler {
 			command = command + (" \"SHELL=" + shell + " -xv\" -f makefile &> " + folderName + "/.process_makefile/all " );
 //					+ folderName + "/.process_makefile/output");
 		}
-		String[] commands = {command, "cp " + folderName + "/.process_makefile/all " + folderName + "/.process_makefile/output"};
-		return Execute.executeCommands(commands);
+		String[] commands = {command};
+		boolean result = Execute.executeCommands(commands);
+		if(result) {
+			filterCapturedFiles();
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	
 	public boolean make(String command) {
@@ -85,33 +92,34 @@ public class ParameterHandler {
 	}
 	
 /*
- * 	这个方法是当正常make抓取不到时, 尝试针对all文件进行抓取处理的操作
+ * 	对抓取到的文件进行过滤
  *      1.需要去掉每行前面的加号
  *      2.需要去掉无用的行(空行 #开头的行)
  */
-	public void captureFromAll() {
+	public void filterCapturedFiles() {
 //		rename all to output and store output to output.old
 		String outputfileName = folderName + "/.process_makefile/output";
-		File output = new File(outputfileName);
-		File oldOutput = new File(outputfileName + ".old"); 
-		output.renameTo(oldOutput);
 		String allName = folderName + "/.process_makefile/all";
-		File all = new File(allName);
-		all.renameTo(output);
-		String tmpfileName = outputfileName + ".tmp";
+		
+		Pattern startWithPlus = Pattern.compile("^\\+* ");
+		Pattern pattern_startWithArCC = Pattern.compile("^\\s*([/a-z0-9-_]*-)?(g?cc|ar) ");
 		
 		BufferedReader br = null;
 	    BufferedWriter bw = null;
 	      try {
-	         br = new BufferedReader(new FileReader(outputfileName));
-	         bw = new BufferedWriter(new FileWriter(tmpfileName));
+	         br = new BufferedReader(new FileReader(allName));
+	         bw = new BufferedWriter(new FileWriter(outputfileName));
 	         String line;
 	         while ((line = br.readLine()) != null) {
 	            if (line.length() > 0) {
-	            	if(line.charAt(0) == '+') {
+	            	Matcher matcher = startWithPlus.matcher(line);
+	            	if(matcher.find()) {
 //		        		去掉每行之前的加号
-		            	line = line.substring(2);
-		            	bw.write(line+"\n");
+	            		line = matcher.replaceAll("");
+	            		matcher = pattern_startWithArCC.matcher(line);
+	            		if(matcher.find()) {
+		            		bw.write(line+"\n");
+	            		}
 	            	} else if(line.startsWith("make")) {
 	            		bw.write(line+"\n");
 	            	}
@@ -130,16 +138,9 @@ public class ParameterHandler {
 	            if(bw != null)
 	               bw.close();
 	         } catch (IOException e) {
-	            //
+	        	 
 	         }
 	      }
-	      // Once everything is complete, delete old file..
-	      File oldFile = new File(outputfileName);
-	      oldFile.delete();
-
-	      // And rename tmp file's name to old file name
-	      File newFile = new File(tmpfileName);
-	      newFile.renameTo(oldFile);
 	}
 	
 	public String getOutput(){
