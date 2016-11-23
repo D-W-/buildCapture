@@ -16,15 +16,14 @@ public class Execute {
 	public static String[] paths = null;
 	
 	public static void executeCommand(String command){
-//		执行一条linux命令 如果命令执行不成功 就直接产生一个异常
 		Runtime runtime = Runtime.getRuntime();
+		String buffer = "";
 		try {
 			Process process = runtime.exec(new String[] {"/bin/sh","-c",command});
 			int waitID = process.waitFor();
 			if(waitID != 0){
 				InputStreamReader isr = new InputStreamReader(process.getErrorStream());
 				BufferedReader br = new BufferedReader(isr);
-				String buffer = "";
 				String line = null;
 				while((line = br.readLine()) != null){
 					buffer += line;
@@ -35,7 +34,39 @@ public class Execute {
 			}
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
-		}	
+		}
+	}
+	
+	public static String executeCommandandGetoutput(String command){
+//		执行一条linux命令 如果命令执行不成功 就直接产生一个异常
+		Runtime runtime = Runtime.getRuntime();
+		String buffer = "";
+		try {
+			Process process = runtime.exec(new String[] {"/bin/sh","-c",command});
+			InputStreamReader isr = new InputStreamReader(process.getInputStream());
+			BufferedReader br = new BufferedReader(isr);
+			String line = null;
+			while((line = br.readLine()) != null){
+				buffer  = buffer + line + System.getProperty("line.separator");
+			}
+			br.close();
+			isr.close();
+			int waitID = process.waitFor();
+			if(waitID != 0){
+				isr = new InputStreamReader(process.getErrorStream());
+				br = new BufferedReader(isr);
+				line = null;
+				while((line = br.readLine()) != null){
+					buffer  = buffer + line + System.getProperty("line.separator");
+				}
+				br.close();
+				isr.close();
+				throw new InterruptedException("shell failed!\n" + buffer);
+			}
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+		}
+		return buffer;
 	}
 	
 	public static boolean executeCommands(String[] commands) {
@@ -62,11 +93,11 @@ public class Execute {
 				String buffer = "";
 				String line = null;
 				while((line = br.readLine()) != null){
-					buffer += line;
+					buffer  = buffer + line + System.getProperty("line.separator");
 				}
 				br.close();
 				isr.close();
-				throw new InterruptedException("shell failed!\n" + buffer);
+				throw new RuntimeException("shell failed!\n" + buffer);
 			}
 	    } catch (IOException | InterruptedException e) {
 			// TODO Auto-generated catch block

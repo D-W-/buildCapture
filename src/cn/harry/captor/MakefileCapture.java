@@ -53,10 +53,15 @@ public class MakefileCapture {
 	
 	public boolean make(String makeCommand, String shell){
 //    编译并抓取
+		if(makeCommand == null || makeCommand.equals("")) {
+			makeCommand = "make";
+		}
+		if(shell == null || shell.equals("")) {
+			shell = SHELL;
+		}
 		if(_projectDirectory != null && !_projectDirectory.equals("")){
 			String makeFolder = _projectDirectory;
-			String outFolder = _outputDirectory;
-			
+			String outFolder = _outputDirectory;	
 //			先处理一下用户目录的问题 ~无法识别
 			if(makeFolder.charAt(0) == '~'){
 				makeFolder = System.getProperty("user.home") + makeFolder.substring(1);
@@ -65,9 +70,7 @@ public class MakefileCapture {
 				outFolder = System.getProperty("user.home") + outFolder.substring(1);
 			}
 			
-			if(makeCommand == null || makeCommand.equals("")) {
-				makeCommand = "make";
-			}
+
 //			对工程执行make，并抓取输出
 			String command = "cd " + makeFolder + " && " + makeCommand;
 			ParameterHandler parameterHandler = new ParameterHandler(outFolder);
@@ -96,6 +99,20 @@ public class MakefileCapture {
 //			}
 //			将tasks存储为json文件
 			storeTasksToJson(outFolder + "/tasks.json");
+//			统计并输出
+			for(int i = 0; i < tasks.size(); ++i) {
+				System.out.println("=====================================================");
+				System.out.println("Codelines\tFilename");
+				String taskNumber = "task" + String.valueOf(i+1);
+				String query = "find " + outFolder + "/" + taskNumber + " -name \"*.i\" | xargs wc -l | head -n -1 | awk '{print $1 \"\t\t\t\" $2}'";
+				String codeLinesOfEachFile = Execute.executeCommandandGetoutput(query);
+				System.out.println(codeLinesOfEachFile);
+				query = "find " + outFolder + "/" + taskNumber + " -name \"*.i\" | xargs wc -l | awk END'{print $1}'";
+				String codeLines = Execute.executeCommandandGetoutput(query);
+				String outputString = "Files: " + tasks.get(i).size() + " Lines: " + codeLines;
+				System.out.println("Total");
+				System.out.println("Task" + String.valueOf(i+1) + " : " + outputString);
+			}
 			return true;
 		}
 		return false;

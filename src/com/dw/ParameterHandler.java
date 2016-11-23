@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 
 import com.util.Execute;
 
+import cn.harry.captor.MakefileCapture;
+
 public class ParameterHandler {
 	/*
 	 * 处理输入参数,接收输入参数,处理参数,对合适的指令调用make指令
@@ -67,6 +69,9 @@ public class ParameterHandler {
 		修改3: 增加选项, 可以指定脚本
 	 */
 	public boolean make(String command, String shell){
+		if(shell == null || shell.equals("")) {
+			shell = MakefileCapture.SHELL;
+		}
 		File tempFile = new File(folderName + "/Makefile");
 //		判断makefile or Makefile
 		if(tempFile.exists()){
@@ -88,7 +93,7 @@ public class ParameterHandler {
 	}
 	
 	public boolean make(String command) {
-		return make(command, "sh");
+		return make(command, MakefileCapture.SHELL);
 	}
 	
 /*
@@ -99,6 +104,14 @@ public class ParameterHandler {
 	public void filterCapturedFiles() {
 //		rename all to output and store output to output.old
 		String outputfileName = folderName + "/.process_makefile/output";
+		
+		File outputfile = new File(outputfileName);
+		try {
+			outputfile.createNewFile();
+		} catch (IOException e1) {
+			throw new RuntimeException(e1.toString());
+		}
+		
 		String allName = folderName + "/.process_makefile/all";
 		
 		Pattern startWithPlus = Pattern.compile("^\\+* ");
@@ -132,13 +145,13 @@ public class ParameterHandler {
 	            if(br != null)
 	               br.close();
 	         } catch (IOException e) {
-	            //
+	            throw new RuntimeException(e.toString());
 	         }
 	         try {
 	            if(bw != null)
 	               bw.close();
 	         } catch (IOException e) {
-	        	 
+	        	 throw new RuntimeException(e.toString());
 	         }
 	      }
 	}
