@@ -16,7 +16,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Stack;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ArrayList;
@@ -246,12 +248,19 @@ public class GetDetectedTasks {
 		List<Integer> inputfileNumberInParts = new ArrayList<>();
 		List<String> partStrings = getInputFileListNumbers(line, currentFolder, inputfileNumberInParts);
 		
+//		新增一个Set来判断某个文件是否已经被加到数据结构里面, 
+//		比如gcc ../lib/libgreputils.a ../lib/libgreputils.a 调用两次lib文件, 只需要处理一次, 否则会产生重复
+		Set<String> processedFile = new HashSet<>();
+		
 //		检测 ar 然后检测其他输入, 并替换
 		String tempString = "";
 		int index = 0;
 		for(int i = 0;i<inputfileNumberInParts.size();++i){
 			index = inputfileNumberInParts.get(i);
 			tempString = partStrings.get(index);
+//			tempString之前已经处理过, 不再重复处理
+			if(processedFile.contains(tempString))
+				continue;
 			if(libMap.containsKey(tempString)){
 				partStrings.set(index, null);
 				List<String> ofileStrings = libMap.get(tempString);
@@ -259,9 +268,13 @@ public class GetDetectedTasks {
 					inputfileNumberInParts.add(partStrings.size());
 					partStrings.add(ofileStrings.get(j));
 				}
+				processedFile.add(tempString);
 			} else{
-				if(fileMap.containsKey(tempString))
+				if(fileMap.containsKey(tempString)) {
 					partStrings.set(index, fileMap.get(tempString).getFirst());
+					processedFile.add(tempString);
+				}
+
 			}
 		}
 		matcher = pattern_filename.matcher(line);
