@@ -259,8 +259,11 @@ public class GetDetectedTasks {
 			index = inputfileNumberInParts.get(i);
 			tempString = partStrings.get(index);
 //			tempString之前已经处理过, 不再重复处理
-			if(processedFile.contains(tempString))
+			if(processedFile.contains(tempString)) {
+				partStrings.set(index, null);
 				continue;
+			}
+
 			if(libMap.containsKey(tempString)){
 				partStrings.set(index, null);
 				List<String> ofileStrings = libMap.get(tempString);
