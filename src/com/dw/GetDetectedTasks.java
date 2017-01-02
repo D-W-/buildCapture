@@ -328,13 +328,20 @@ public class GetDetectedTasks {
 				continue;
 			matcher = pattern_sorcefileSuffix.matcher(tempString);
 			if(!matcher.find()){
-//				提取前缀
+//				提取后缀
 				iter = tempString.length()-1;
+//				增加处理, 用行号加文件名当新的文件名, 避免重复, 如, line185-imap-util.o.i
 				while(iter >= 0 && tempString.charAt(iter) != '/'){
 					--iter;
 				}
-				taskiFiles.add(tempString.substring(iter+1));
-				commands.add("cp " + tempString + " " + folder);
+				--iter;
+				while(iter >= 0 && tempString.charAt(iter) != '/'){
+					--iter;
+				}
+				String taskFileName = tempString.substring(iter+1);
+				taskFileName = taskFileName.replace('/', '-');
+				taskiFiles.add(taskFileName);
+				commands.add("cp " + tempString + " " + folder + "/" + taskFileName);
 			}
 		}
 //		只有当输入文件里面有中间文件的时候才执行复制

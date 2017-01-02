@@ -1,5 +1,7 @@
 package cn.harry.builder;
 
+import com.dw.GetDetectedTasks;
+
 //import com.dw.GetDetectedTasks;
 
 import cn.harry.captor.MakefileCapture;
@@ -14,14 +16,14 @@ public class MakefileCaptureBuilder {
 	}
 	
 	public static void main(String[] args){
-		String makefolder = "/home/harry/code/grep-2.25";
+		String makefolder = "/home/harry/code/dovecot-1.2.17";
 		MakefileCapture makefileCapture = getCaptor(makefolder, makefolder);
 		makefileCapture.make("make", "/bin/bash");
 //		makefileCapture.clean();
 		
 //		GetDetectedTasks getDetectTasks = new GetDetectedTasks(makefolder,makefolder + "/.process_makefile");
 //		getDetectTasks.deal();
-//		String outFolder = makefolder + "/.process_makefile";
+//		String outFolder = "/home/harry/code/dovecot/.debug";
 //		GetDetectedTasks getDetectTasks = new GetDetectedTasks(makefolder,outFolder);
 //		getDetectTasks.deal();
 	}
