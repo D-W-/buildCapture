@@ -100,22 +100,26 @@ public class MakefileCapture {
 //			将tasks存储为json文件
 			storeTasksToJson(outFolder + "/tasks.json");
 //			统计并输出
-			for(int i = 0; i < tasks.size(); ++i) {
-				System.out.println("=====================================================");
-				System.out.println("Codelines\tFilename");
-				String taskNumber = "task" + String.valueOf(i+1);
-				String query = "find " + outFolder + "/" + taskNumber + " -name \"*.i\" | xargs wc -l | head -n -1 | awk '{print $1 \"\t\t\t\" $2}'";
-				String codeLinesOfEachFile = Execute.executeCommandandGetoutput(query);
-				System.out.println(codeLinesOfEachFile);
-				query = "find " + outFolder + "/" + taskNumber + " -name \"*.i\" | xargs wc -l | awk END'{print $1}'";
-				String codeLines = Execute.executeCommandandGetoutput(query);
-				String outputString = "Files: " + tasks.get(i).size() + " Lines: " + codeLines;
-				System.out.println("Total");
-				System.out.println("Task" + String.valueOf(i+1) + " : " + outputString);
-			}
+			printTasks(tasks, outFolder);
 			return true;
 		}
 		return false;
+	}
+	
+	public static void printTasks(List<List<String>> tasks, String outFolder) {
+		for(int i = 0; i < tasks.size(); ++i) {
+			System.out.println("=====================================================");
+			System.out.println("Codelines\tFilename");
+			String taskNumber = "task" + String.valueOf(i+1);
+			String query = "find " + outFolder + "/" + taskNumber + " -name \"*.i\" | xargs wc -l | head -n -1 | awk '{print $1 \"\t\t\t\" $2}'";
+			String codeLinesOfEachFile = Execute.executeCommandandGetoutput(query);
+			System.out.println(codeLinesOfEachFile);
+			query = "find " + outFolder + "/" + taskNumber + " -name \"*.i\" | xargs wc -l | awk END'{print $1}'";
+			String codeLines = Execute.executeCommandandGetoutput(query);
+			String outputString = "Files: " + tasks.get(i).size() + " Lines: " + codeLines;
+			System.out.println("Total");
+			System.out.println("Task" + String.valueOf(i+1) + " : " + outputString);
+		}
 	}
 	
 	/*

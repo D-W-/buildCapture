@@ -97,10 +97,11 @@ public class Execute {
 				}
 				br.close();
 				isr.close();
-				throw new RuntimeException("shell failed!\n" + buffer);
+//				throw new RuntimeException("shell failed!\n" + buffer);
+				System.err.println("shell failed!\n" + buffer);
+				result = false;
 			}
 	    } catch (IOException | InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			result = false;
 		} finally {

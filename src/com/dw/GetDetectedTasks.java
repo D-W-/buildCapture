@@ -235,7 +235,6 @@ public class GetDetectedTasks {
 		
 //		记录一下task文件夹里面的 .i 文件
 		List<String> taskiFiles = new LinkedList<String>();
-		taskMap.put(folder, taskiFiles);
 		
 //		去掉输出文件
 		Matcher matcher = pattern_out.matcher(line);
@@ -346,7 +345,11 @@ public class GetDetectedTasks {
 		}
 //		只有当输入文件里面有中间文件的时候才执行复制
 		if(!commands.isEmpty()){
-			Execute.executeCommands((String[])commands.toArray(new String[commands.size()]));
+			boolean executeResult = true;
+			executeResult = Execute.executeCommands((String[])commands.toArray(new String[commands.size()]));
+			if(executeResult) {
+				taskMap.put(folder, taskiFiles);		
+			}
 		}
 
 		
