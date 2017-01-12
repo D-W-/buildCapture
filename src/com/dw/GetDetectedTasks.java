@@ -351,6 +351,9 @@ public class GetDetectedTasks {
 				taskMap.put(folder, taskiFiles);		
 			}
 		}
+		else {
+			taskMap.put(folder, taskiFiles);	
+		}
 
 		
 		return result;

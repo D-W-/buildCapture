@@ -15,7 +15,7 @@ public class MakefileCaptureBuilder {
 	}
 	
 	public static void main(String[] args){
-		String makefolder = "/home/harry/code/wireshark-2.2.1";
+		String makefolder = "/home/harry/code/vim";
 		MakefileCapture makefileCapture = getCaptor(makefolder, makefolder);
 		makefileCapture.make("make", "/bin/bash");
 //		makefileCapture.clean();
