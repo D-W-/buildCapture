@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 public class GetDetectedTasks {
 	/*
@@ -114,13 +115,26 @@ public class GetDetectedTasks {
 	public List<List<String>> getTaskList(){
 //		先将filename转换为绝对路径
 		HashMap<String, List<String>> taskMapBackup = new HashMap<String, List<String>>(taskMap);
-	    for (Entry<String, List<String>> task : taskMapBackup.entrySet()) {
-	        int size = task.getValue().size();
-	        for (int i = 0; i < size; i++) {
-	          task.getValue().set(i, task.getKey() + "/" + task.getValue().get(i));
-	        }
-	    }
-	    List<List<String>> tasks = new ArrayList<List<String>>(taskMapBackup.values());
+		List<String> orderedtasks = new ArrayList<>();
+		List<List<String>> tasks = new ArrayList<>();
+		orderedtasks.addAll(taskMap.keySet());
+		Collections.sort(orderedtasks);
+		for(String taskNum : orderedtasks) {
+			List<String> files = taskMapBackup.get(taskNum);
+			List<String> outFiles = new ArrayList<>();
+			for(String file : files) {
+				file = taskNum + "/" + file;
+				outFiles.add(file);
+			}
+			tasks.add(outFiles);
+		}
+//	    for (Entry<String, List<String>> task : taskMapBackup.entrySet()) {
+//	        int size = task.getValue().size();
+//	        for (int i = 0; i < size; i++) {
+//	          task.getValue().set(i, task.getKey() + "/" + task.getValue().get(i));
+//	        }
+//	    }
+//	    List<List<String>> tasks = new ArrayList<List<String>>(taskMapBackup.values());
 	    return tasks;
 	}
 	
