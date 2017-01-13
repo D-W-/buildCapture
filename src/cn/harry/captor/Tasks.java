@@ -24,7 +24,10 @@ public class Tasks {
 	}
 	
 	public Task getTask(String taskName) {
-		return tasks.get(nameToTaskNumber.get(taskName));
+		Integer taskNumber = nameToTaskNumber.get(taskName);
+		if(taskNumber == null)
+			return null;
+		return tasks.get(taskNumber);
 	}
 	
 	public void addTask(String taskName, Task task){
