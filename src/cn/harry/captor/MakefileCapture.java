@@ -8,8 +8,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 import com.dw.GetDetectedTasks;
 import com.dw.ParameterHandler;
@@ -29,9 +27,7 @@ public class MakefileCapture {
 	private String _outputDirectory = null;
 	
 	public static final String SHELL = "sh";
-	
-//	public static HashMap<String, List<String>> taskMap;
-	public static List<List<String>> tasks;
+	public static Tasks tasks;
 	
 	public MakefileCapture(String projectDirectory, String outputDirectory){
 		_projectDirectory = projectDirectory;
@@ -89,37 +85,17 @@ public class MakefileCapture {
 			getDetectTasks.deal();
 			tasks = getDetectTasks.getTaskList();
 			
-////			增加处理流程, 如果标准输出抓取不到任何tasks, 尝试读取关闭silent选项(打开verbose选项)的all文件进行抓取
-//			if(tasks.isEmpty()){
-////				针对all文件进行抓取
-//				parameterHandler.captureFromAll();
-////				重新尝试获取tasks
-//				getDetectTasks.deal();
-//				tasks = getDetectTasks.getTaskList();
-//			}
 //			将tasks存储为json文件
 			storeTasksToJson(outFolder + "/tasks.json");
 //			统计并输出
-			printTasks(tasks, outFolder);
+			printTasks(tasks);
 			return true;
 		}
 		return false;
 	}
 	
-	public static void printTasks(List<List<String>> tasks, String outFolder) {
-		for(int i = 0; i < tasks.size(); ++i) {
-			System.out.println("=====================================================");
-			System.out.println("Codelines\tFilename");
-			String taskNumber = "task" + String.valueOf(i+1);
-			String query = "find " + outFolder + "/" + taskNumber + " -name \"*.i\" | xargs wc -l | head -n -1 | awk '{print $1 \"\t\t\t\" $2}'";
-			String codeLinesOfEachFile = Execute.executeCommandandGetoutput(query);
-			System.out.println(codeLinesOfEachFile);
-			query = "find " + outFolder + "/" + taskNumber + " -name \"*.i\" | xargs wc -l | awk END'{print $1}'";
-			String codeLines = Execute.executeCommandandGetoutput(query);
-			String outputString = "Files: " + tasks.get(i).size() + " Lines: " + codeLines;
-			System.out.println("Total");
-			System.out.println("Task" + String.valueOf(i+1) + " : " + outputString);
-		}
+	public static void printTasks(Tasks tasks) {
+		System.out.println(tasks);
 	}
 	
 	/*
@@ -127,15 +103,15 @@ public class MakefileCapture {
 	 * @param jsonFilePath: json文件存储的地址
 	 */
 	private void storeTasksToJson(String jsonFilePath){
-	    //    写文件
-	    Type myType = new TypeToken<LinkedList<LinkedList<String>>>(){}.getType();
+	    //写文件
+	    Type myType = new TypeToken<Tasks>(){}.getType();
 		try {
 			JsonWriter writer = new JsonWriter(new FileWriter(jsonFilePath));
 			Gson gson = new GsonBuilder().create();
 			gson.toJson(tasks, myType, writer);
 			writer.flush();
 		} catch (IOException e) {
-			throw new RuntimeException("output transform to json failed");
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -143,13 +119,13 @@ public class MakefileCapture {
 	 * 从json文件中恢复出tasks
 	 *  @param jsonFilePath: json文件存储的地址
 	 */
-	public static List<List<String>> getTasksFromJson(String jsonFilePath){
-	    Type myType = new TypeToken<LinkedList<LinkedList<String>>>(){}.getType();
+	public static Tasks getTasksFromJson(String jsonFilePath){
+	    Type myType = new TypeToken<Tasks>(){}.getType();
 		try {
 			JsonReader reader = new JsonReader(new FileReader(jsonFilePath));
 			tasks = new Gson().fromJson(reader, myType);
 		} catch (FileNotFoundException e) {
-			throw new RuntimeException("json to tasks failed");
+			throw new RuntimeException(e.getMessage());
 		}
 		return tasks;
 	}
@@ -158,7 +134,7 @@ public class MakefileCapture {
 	 * 
 	 * @return task1: List<fileName>, task2: List<fileName> ...
 	 */
-	public List<List<String>> getTasks(){
+	public Tasks getTasks(){
 //		得到生成的所有的task路径, 如果当前的工程没有生成可执行文件,就返回一个空列表
 		return tasks;
 	}

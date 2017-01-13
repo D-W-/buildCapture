@@ -5,19 +5,18 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
-
 import com.dw.GetDetectedTasks;
 import com.dw.ParameterHandler;
 import com.util.Execute;
+
+import cn.harry.captor.Tasks;
 
 public class MakefileProcessor{
 
 	public static String _makeFolder = null;
 	public static String _outFolder = null;
 	public static Integer taskNumber = 0;
-	public static HashMap<String, List<String>> taskMap;
+	public static Tasks taskList;
 	
 	public static boolean runWithPath(String makeFolder, String outFolder, String path){
 //		增加环境变量path
@@ -69,7 +68,7 @@ public class MakefileProcessor{
 			GetDetectedTasks getDetectTasks = new GetDetectedTasks(makeFolder,outFolder);
 			getDetectTasks.deal();
 //			taskNumber = getDetectTasks.getTaskNumber();
-			taskMap = getDetectTasks.getTaskMap();
+			taskList = getDetectTasks.getTaskList();
 			return true;
 		}
 		return false;
@@ -99,10 +98,10 @@ public class MakefileProcessor{
 		return result;
 	}
 	
-	public static HashMap<String, List<String>> getTaskPaths(){
+	public static Tasks getTaskPaths(){
 //		hash<String, List<String>>
 //		得到生成的所有的task路径, 如果当前的工程没有生成可执行文件,就返回一个空列表
-		return taskMap;
+		return taskList;
 	}
 	
 	public static void clean(){

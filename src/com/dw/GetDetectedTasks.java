@@ -3,6 +3,9 @@ package com.dw;
 import com.not.so.common.Pair;
 import com.util.Execute;
 
+import cn.harry.captor.Task;
+import cn.harry.captor.Tasks;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,7 +18,6 @@ import java.io.OutputStreamWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Stack;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,7 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 public class GetDetectedTasks {
 	/*
@@ -57,7 +58,7 @@ public class GetDetectedTasks {
 	HashMap<String, List<String>> libMap = new HashMap<>();
 	
 //	每次生成或者移动 .i 文件到某个 task 文件夹的时候,都存一下
-	HashMap<String, List<String>> taskMap = new HashMap<>();
+	Tasks tasks = new Tasks();
 	
 	public GetDetectedTasks(String makeFolder,String outFolder){
 		this.makeFolder = makeFolder;
@@ -108,34 +109,8 @@ public class GetDetectedTasks {
 		return this.taskNumber;
 	}
 	
-	public HashMap<String, List<String>> getTaskMap(){
-	    return this.taskMap;
-	}
-	
-	public List<List<String>> getTaskList(){
-//		先将filename转换为绝对路径
-		HashMap<String, List<String>> taskMapBackup = new HashMap<String, List<String>>(taskMap);
-		List<String> orderedtasks = new ArrayList<>();
-		List<List<String>> tasks = new ArrayList<>();
-		orderedtasks.addAll(taskMap.keySet());
-		Collections.sort(orderedtasks);
-		for(String taskNum : orderedtasks) {
-			List<String> files = taskMapBackup.get(taskNum);
-			List<String> outFiles = new ArrayList<>();
-			for(String file : files) {
-				file = taskNum + "/" + file;
-				outFiles.add(file);
-			}
-			tasks.add(outFiles);
-		}
-//	    for (Entry<String, List<String>> task : taskMapBackup.entrySet()) {
-//	        int size = task.getValue().size();
-//	        for (int i = 0; i < size; i++) {
-//	          task.getValue().set(i, task.getKey() + "/" + task.getValue().get(i));
-//	        }
-//	    }
-//	    List<List<String>> tasks = new ArrayList<List<String>>(taskMapBackup.values());
-	    return tasks;
+	public Tasks getTaskList(){
+	    return this.tasks;
 	}
 	
 	public void deal() {
@@ -243,6 +218,7 @@ public class GetDetectedTasks {
 //		输入是一个会得到可执行文件的指令,需要更改这个指令,并把所有需要的 .i 文件放到一个文件夹里面
 		taskNumber++;
 		String result = "";
+		String taskName = "";
 		String folder = outFolder + "/task" + String.valueOf(taskNumber);
 		File dirFile = new File(folder);
 		dirFile.mkdir();
@@ -250,10 +226,11 @@ public class GetDetectedTasks {
 //		记录一下task文件夹里面的 .i 文件
 		List<String> taskiFiles = new LinkedList<String>();
 		
-//		去掉输出文件
+//		去掉输出文件并记录生成的可执行文件名称
 		Matcher matcher = pattern_out.matcher(line);
 		if(matcher.find()){
-			result = currentFolder + matcher.group(1);
+			taskName = matcher.group(1);
+			result = currentFolder + taskName;
 			line = matcher.replaceAll("");
 		}
 		
@@ -312,7 +289,6 @@ public class GetDetectedTasks {
 //			输入文件包含源文件的情况 先将源文件编成 .i 文件,直接生成到目标文件夹里面
 			line = nonSourcefileParts;
 			
-
 //			加上匹配到的源文件,注意空格分割
 			String outFileName = toAbsolutePath(currentFolder, matcher.group(1));
 			line += (" " + outFileName);
@@ -362,14 +338,17 @@ public class GetDetectedTasks {
 			boolean executeResult = true;
 			executeResult = Execute.executeCommands((String[])commands.toArray(new String[commands.size()]));
 			if(executeResult) {
-				taskMap.put(folder, taskiFiles);		
+				tasks.addTask(taskName, Task.of(folder, taskiFiles, taskName));	
+			}
+			else {
+//				generate failed
+				taskNumber--;
+				Execute.executeCommand("rm -r " + folder);
 			}
 		}
 		else {
-			taskMap.put(folder, taskiFiles);	
+			tasks.addTask(taskName, Task.of(folder, taskiFiles, taskName));		
 		}
-
-		
 		return result;
 	}
 	
