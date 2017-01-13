@@ -1,5 +1,6 @@
 package com.dw;
 
+import com.google.common.collect.ImmutableMap;
 import com.not.so.common.Pair;
 import com.util.Execute;
 
@@ -59,6 +60,8 @@ public class GetDetectedTasks {
 	
 //	每次生成或者移动 .i 文件到某个 task 文件夹的时候,都存一下
 	Tasks tasks = new Tasks();
+//	抓取的时候可以指定宏
+	String macros = null;
 	
 	public GetDetectedTasks(String makeFolder,String outFolder){
 		this.makeFolder = makeFolder;
@@ -441,6 +444,9 @@ public class GetDetectedTasks {
 //		处理一行的详细步骤
 		lineNumber++;
 		String result = "";
+//		判断是否指定了宏
+		if(macros != null)
+			line = line + macros;
 //		处理之前应该先把双引号换成空格, 防止文件名出错
 //		修改了正则表达式而不是修改抓取结果, 防止将gcc语句中的"替换掉
 //		line = line.replace('\"', ' ');
@@ -497,4 +503,16 @@ public class GetDetectedTasks {
 		return result;
 	}
 
+	public void setMacros(ImmutableMap<String, String> macroMap){
+		macros = "";
+		for(String macro : macroMap.keySet()) {
+			String value = macroMap.get(macro);
+			if(value == null){
+				macros = macros + " -D" + macro;
+			}
+			else {
+				macros = macros + " -D\"" + macro +"=" + value + "\"";
+			}
+		}
+	}
 }

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 import com.dw.GetDetectedTasks;
 import com.dw.ParameterHandler;
-
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -28,6 +28,9 @@ public class MakefileCapture {
 	
 	public static final String SHELL = "sh";
 	public static Tasks tasks;
+	
+	String makeFolder = null;
+	String outFolder = null;
 	
 	public MakefileCapture(String projectDirectory, String outputDirectory){
 		_projectDirectory = projectDirectory;
@@ -47,8 +50,41 @@ public class MakefileCapture {
 		return make(makeCommand, SHELL);
 	}
 	
+	public boolean make(String makeCommand, String shell, ImmutableMap<String, String> macroMap) {
+		if(buildAndCapture(makeCommand, shell)){
+//			输入一个 output 文件,执行输出增加 -E 选项
+			GetDetectedTasks getDetectTasks = new GetDetectedTasks(makeFolder,outFolder);
+			getDetectTasks.setMacros(macroMap);
+			getDetectTasks.deal();
+			tasks = getDetectTasks.getTaskList();
+			
+//			将tasks存储为json文件
+			storeTasksToJson(outFolder + "/tasks.json");
+//			统计并输出
+			printTasks(tasks);
+			return true;
+		}
+		return false;
+	}
+	
 	public boolean make(String makeCommand, String shell){
-//    编译并抓取
+		if(buildAndCapture(makeCommand, shell)){
+//			输入一个 output 文件,执行输出增加 -E 选项
+			GetDetectedTasks getDetectTasks = new GetDetectedTasks(makeFolder,outFolder);
+			getDetectTasks.deal();
+			tasks = getDetectTasks.getTaskList();
+			
+//			将tasks存储为json文件
+			storeTasksToJson(outFolder + "/tasks.json");
+//			统计并输出
+			printTasks(tasks);
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean buildAndCapture(String makeCommand, String shell) {
+//	    编译并抓取
 		if(makeCommand == null || makeCommand.equals("")) {
 			makeCommand = "make";
 		}
@@ -56,8 +92,8 @@ public class MakefileCapture {
 			shell = SHELL;
 		}
 		if(_projectDirectory != null && !_projectDirectory.equals("")){
-			String makeFolder = _projectDirectory;
-			String outFolder = _outputDirectory;	
+			makeFolder = _projectDirectory;
+			outFolder = _outputDirectory;	
 //			先处理一下用户目录的问题 ~无法识别
 			if(makeFolder.charAt(0) == '~'){
 				makeFolder = System.getProperty("user.home") + makeFolder.substring(1);
@@ -66,7 +102,6 @@ public class MakefileCapture {
 				outFolder = System.getProperty("user.home") + outFolder.substring(1);
 			}
 			
-
 //			对工程执行make，并抓取输出
 			String command = "cd " + makeFolder + " && " + makeCommand;
 			ParameterHandler parameterHandler = new ParameterHandler(outFolder);
@@ -79,16 +114,6 @@ public class MakefileCapture {
 			}
 			rootFolder.mkdir();
 			parameterHandler.make(command, shell);
-			
-//			输入一个 output 文件,执行输出增加 -E 选项
-			GetDetectedTasks getDetectTasks = new GetDetectedTasks(makeFolder,outFolder);
-			getDetectTasks.deal();
-			tasks = getDetectTasks.getTaskList();
-			
-//			将tasks存储为json文件
-			storeTasksToJson(outFolder + "/tasks.json");
-//			统计并输出
-			printTasks(tasks);
 			return true;
 		}
 		return false;

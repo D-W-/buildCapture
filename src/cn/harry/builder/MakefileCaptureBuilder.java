@@ -1,5 +1,7 @@
 package cn.harry.builder;
 
+import com.google.common.collect.ImmutableMap;
+
 //import com.dw.GetDetectedTasks;
 //import com.dw.GetDetectedTasks;
 
@@ -15,9 +17,10 @@ public class MakefileCaptureBuilder {
 	}
 	
 	public static void main(String[] args){
-		String makefolder = "/home/harry/code/dovecot-1.2.17";
+		ImmutableMap<String, String> macro = ImmutableMap.<String, String>builder().put("FIRST","").build();
+		String makefolder = "/home/harry/learn/learnGCC";
 		MakefileCapture makefileCapture = getCaptor(makefolder, makefolder);
-		makefileCapture.make("make", "/bin/bash");
+		makefileCapture.make("make", "/bin/bash", macro);
 //		makefileCapture.clean();
 		
 //		GetDetectedTasks getDetectTasks = new GetDetectedTasks(makefolder,makefolder + "/.process_makefile");
