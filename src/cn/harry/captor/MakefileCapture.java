@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.dw.GetDetectedTasks;
@@ -51,6 +52,15 @@ public class MakefileCapture {
 	}
 	
 	public boolean make(String makeCommand, String shell, String macors) {
+		if(buildAndCapture(makeCommand, shell)){
+			tasks = getDetectedTasks(macors);
+			storeAndPrint();
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean make(String makeCommand, String shell, List<String> macors) {
 		if(buildAndCapture(makeCommand, shell)){
 			tasks = getDetectedTasks(macors);
 			storeAndPrint();
@@ -136,6 +146,16 @@ public class MakefileCapture {
 	 * 输入一个 output 文件,执行输出增加 -E 选项
 	 */
 	public Tasks getDetectedTasks(Map<String, String> macroMap) {
+		GetDetectedTasks getDetectTasks = new GetDetectedTasks(makeFolder,outFolder);
+		getDetectTasks.setMacros(macroMap);
+		getDetectTasks.deal();
+		return getDetectTasks.getTaskList();
+	}
+	
+	/*
+	 * 输入一个 output 文件,执行输出增加 -E 选项
+	 */
+	public Tasks getDetectedTasks(List<String> macroMap) {
 		GetDetectedTasks getDetectTasks = new GetDetectedTasks(makeFolder,outFolder);
 		getDetectTasks.setMacros(macroMap);
 		getDetectTasks.deal();

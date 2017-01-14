@@ -516,6 +516,18 @@ public class GetDetectedTasks {
 		}
 	}
 	
+	public void setMacros(List<String> macroList) {
+		macros = "";
+		for(String macro : macroList) {
+			if(macro.contains("=")) {
+				macros = macros + " -D\"" + macro + "\"";
+			}
+			else {
+				macros = macros + " -D" + macro;
+			}
+		}
+	}
+	
 	public void setMacros(String macros) {
 		this.macros = macros;
 	}
