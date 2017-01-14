@@ -8,10 +8,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Map;
 
 import com.dw.GetDetectedTasks;
 import com.dw.ParameterHandler;
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -50,18 +50,19 @@ public class MakefileCapture {
 		return make(makeCommand, SHELL);
 	}
 	
-	public boolean make(String makeCommand, String shell, ImmutableMap<String, String> macroMap) {
+	public boolean make(String makeCommand, String shell, String macors) {
 		if(buildAndCapture(makeCommand, shell)){
-//			输入一个 output 文件,执行输出增加 -E 选项
-			GetDetectedTasks getDetectTasks = new GetDetectedTasks(makeFolder,outFolder);
-			getDetectTasks.setMacros(macroMap);
-			getDetectTasks.deal();
-			tasks = getDetectTasks.getTaskList();
-			
-//			将tasks存储为json文件
-			storeTasksToJson(outFolder + "/tasks.json");
-//			统计并输出
-			printTasks(tasks);
+			tasks = getDetectedTasks(macors);
+			storeAndPrint();
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean make(String makeCommand, String shell, Map<String, String> macroMap) {
+		if(buildAndCapture(makeCommand, shell)){
+			tasks = getDetectedTasks(macroMap);
+			storeAndPrint();
 			return true;
 		}
 		return false;
@@ -69,15 +70,8 @@ public class MakefileCapture {
 	
 	public boolean make(String makeCommand, String shell){
 		if(buildAndCapture(makeCommand, shell)){
-//			输入一个 output 文件,执行输出增加 -E 选项
-			GetDetectedTasks getDetectTasks = new GetDetectedTasks(makeFolder,outFolder);
-			getDetectTasks.deal();
-			tasks = getDetectTasks.getTaskList();
-			
-//			将tasks存储为json文件
-			storeTasksToJson(outFolder + "/tasks.json");
-//			统计并输出
-			printTasks(tasks);
+			tasks = getDetectedTasks();
+			storeAndPrint();
 			return true;
 		}
 		return false;
@@ -117,6 +111,42 @@ public class MakefileCapture {
 			return true;
 		}
 		return false;
+	}
+	
+	/*
+	 * 输入一个 output 文件,执行输出增加 -E 选项
+	 */
+	public Tasks getDetectedTasks() {
+		GetDetectedTasks getDetectTasks = new GetDetectedTasks(makeFolder,outFolder);
+		getDetectTasks.deal();
+		return getDetectTasks.getTaskList();
+	}
+	
+	/*
+	 * 输入一个 output 文件,执行输出增加 -E 选项
+	 */
+	public Tasks getDetectedTasks(String macros) {
+		GetDetectedTasks getDetectTasks = new GetDetectedTasks(makeFolder,outFolder);
+		getDetectTasks.setMacros(macros);
+		getDetectTasks.deal();
+		return getDetectTasks.getTaskList();
+	}
+	
+	/*
+	 * 输入一个 output 文件,执行输出增加 -E 选项
+	 */
+	public Tasks getDetectedTasks(Map<String, String> macroMap) {
+		GetDetectedTasks getDetectTasks = new GetDetectedTasks(makeFolder,outFolder);
+		getDetectTasks.setMacros(macroMap);
+		getDetectTasks.deal();
+		return getDetectTasks.getTaskList();
+	}
+	
+	public void storeAndPrint() {
+//		将tasks存储为json文件
+		storeTasksToJson(outFolder + "/tasks.json");
+//		统计并输出
+		printTasks(tasks);
 	}
 	
 	public static void printTasks(Tasks tasks) {

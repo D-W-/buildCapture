@@ -1,6 +1,5 @@
 package com.dw;
 
-import com.google.common.collect.ImmutableMap;
 import com.not.so.common.Pair;
 import com.util.Execute;
 
@@ -24,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -503,7 +503,7 @@ public class GetDetectedTasks {
 		return result;
 	}
 
-	public void setMacros(ImmutableMap<String, String> macroMap){
+	public void setMacros(Map<String, String> macroMap) {
 		macros = "";
 		for(String macro : macroMap.keySet()) {
 			String value = macroMap.get(macro);
@@ -514,5 +514,9 @@ public class GetDetectedTasks {
 				macros = macros + " -D\"" + macro +"=" + value + "\"";
 			}
 		}
+	}
+	
+	public void setMacros(String macros) {
+		this.macros = macros;
 	}
 }

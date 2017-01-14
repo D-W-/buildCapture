@@ -1,6 +1,7 @@
 package cn.harry.builder;
 
-import com.google.common.collect.ImmutableMap;
+
+import com.dw.GetDetectedTasks;
 
 //import com.dw.GetDetectedTasks;
 //import com.dw.GetDetectedTasks;
@@ -17,14 +18,15 @@ public class MakefileCaptureBuilder {
 	}
 	
 	public static void main(String[] args){
-		ImmutableMap<String, String> macro = ImmutableMap.<String, String>builder().put("FIRST","").build();
-		String makefolder = "/home/harry/learn/learnGCC";
-		MakefileCapture makefileCapture = getCaptor(makefolder, makefolder);
-		makefileCapture.make("make", "/bin/bash", macro);
+//		Map<String, String> macro = Maps.newHashMap();
+//		macro.put("FIRST", null);
+		String makefolder = "/home/harry/code/vim1/vim";
+//		MakefileCapture makefileCapture = getCaptor(makefolder, makefolder);
+//		makefileCapture.make("make", "/bin/bash");
 //		makefileCapture.clean();
 		
-//		GetDetectedTasks getDetectTasks = new GetDetectedTasks(makefolder,makefolder + "/.process_makefile");
-//		getDetectTasks.deal();
+		GetDetectedTasks getDetectTasks = new GetDetectedTasks(makefolder,makefolder + "/.process_makefile");
+		getDetectTasks.deal();
 //		String outFolder = "/home/harry/code/dovecot/.debug";
 //		GetDetectedTasks getDetectTasks = new GetDetectedTasks(makefolder,outFolder);
 //		getDetectTasks.deal();
