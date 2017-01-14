@@ -20,7 +20,7 @@ public class MakefileCaptureBuilder {
 	public static void main(String[] args){
 //		Map<String, String> macro = Maps.newHashMap();
 //		macro.put("FIRST", null);
-		String makefolder = "/home/harry/code/vim1/vim";
+		String makefolder = "/home/harry/code/wireshark-2.2.1/";
 //		MakefileCapture makefileCapture = getCaptor(makefolder, makefolder);
 //		makefileCapture.make("make", "/bin/bash");
 //		makefileCapture.clean();

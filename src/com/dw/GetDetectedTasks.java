@@ -320,6 +320,12 @@ public class GetDetectedTasks {
 				continue;
 			matcher = pattern_sorcefileSuffix.matcher(tempString);
 			if(!matcher.find()){
+				if(!tempString.endsWith("i")) {
+//					输入文件有不能找到匹配的文件(.o不能对应.i), task 生成失败
+					taskNumber--;
+					Execute.executeCommand("rm -r " + folder);
+					return result + " Failed. ";
+				}
 //				提取后缀
 				iter = tempString.length()-1;
 //				增加处理, 用行号加文件名当新的文件名, 避免重复, 如, line185-imap-util.o.i
