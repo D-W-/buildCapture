@@ -181,6 +181,9 @@ public class GetDetectedTasks {
 	}
 	
 	public String toAbsolutePath(String folderString,String relativePath){
+		if(relativePath.startsWith("/")) {
+			return relativePath;
+		}
 		File folder = new File(folderString);
 		File tempRelativeFile = new File(folder,relativePath);
 		try {
@@ -192,6 +195,7 @@ public class GetDetectedTasks {
 	}
 	
 	public boolean hasInput(String option){
+		option = option.trim();
 //		判断该命令后面是否有输入文件
 		if(option.equals("-aux-info") 
 				|| option.equals("-include") || option.equals("-imacros") || option.equals("-iprefix")
@@ -237,7 +241,7 @@ public class GetDetectedTasks {
 			line = matcher.replaceAll("");
 		}
 		
-//		得到输入文件列表,记录编号
+//		得到输入文件列表, inputfileNumberInParts记录了输入文件在partString中的编号
 		List<Integer> inputfileNumberInParts = new ArrayList<>();
 		List<String> partStrings = getInputFileListNumbers(line, currentFolder, inputfileNumberInParts);
 		
@@ -245,7 +249,7 @@ public class GetDetectedTasks {
 //		比如gcc ../lib/libgreputils.a ../lib/libgreputils.a 调用两次lib文件, 只需要处理一次, 否则会产生重复
 		Set<String> processedFile = new HashSet<>();
 		
-//		检测 ar 然后检测其他输入, 并替换
+//		检测 ar 然后检测其他输入, 并替换, 替换 .o 文件
 		String tempString = "";
 		int index = 0;
 		for(int i = 0;i<inputfileNumberInParts.size();++i){
@@ -255,6 +259,8 @@ public class GetDetectedTasks {
 			if(processedFile.contains(tempString)) {
 				partStrings.set(index, null);
 				continue;
+			} else {
+				processedFile.add(tempString);
 			}
 
 			if(libMap.containsKey(tempString)){
@@ -263,14 +269,9 @@ public class GetDetectedTasks {
 				for(int j = 0; j < ofileStrings.size(); ++j){
 					inputfileNumberInParts.add(partStrings.size());
 					partStrings.add(ofileStrings.get(j));
-				}
-				processedFile.add(tempString);
-			} else{
-				if(fileMap.containsKey(tempString)) {
-					partStrings.set(index, fileMap.get(tempString).getFirst());
-					processedFile.add(tempString);
-				}
-
+				}				
+			} else if(fileMap.containsKey(tempString)) {
+				partStrings.set(index, fileMap.get(tempString).getFirst());
 			}
 		}
 		matcher = pattern_filename.matcher(line);
@@ -320,7 +321,7 @@ public class GetDetectedTasks {
 				continue;
 			matcher = pattern_sorcefileSuffix.matcher(tempString);
 			if(!matcher.find()){
-				if(!tempString.endsWith("i")) {
+				if(!tempString.startsWith("/usr/lib") && !tempString.endsWith("i")) {
 //					输入文件有不能找到匹配的文件(.o不能对应.i), task 生成失败
 					taskNumber--;
 					Execute.executeCommand("rm -r " + folder);
@@ -382,7 +383,7 @@ public class GetDetectedTasks {
 				while(iter >= 0 && outFileName.charAt(iter) != '/'){
 					--iter;
 				}
-				changedFilename = folder + "/" + outFileName.substring(iter+1) + ".i";
+				changedFilename = toAbsolutePath(folder, outFileName.substring(iter+1) + ".i");
 				result = matcher.replaceAll("-o " + changedFilename + " ");
 			} else{
 //				没指定输出名称,这时 gcc 会默认输入名称加 .o 或者 .s 为输出名称
@@ -395,7 +396,7 @@ public class GetDetectedTasks {
 				} else{
 					outFileName += ".o";
 				}
-				changedFilename = folder + "/" + outFileName + ".i";
+				changedFilename = toAbsolutePath(folder, outFileName + ".i");
 				result += (" -o " + changedFilename);
 			}
 //			建立对应关系
