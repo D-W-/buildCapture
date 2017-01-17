@@ -44,6 +44,9 @@ public class Task {
 	}
 	
 	private int fileLineNumber(String file) {
+		if(!file.endsWith("i")) {
+			return -1;
+		}
 		String query = "wc -l " + file + " | awk '{print $1}'";
 		String codeLines = Execute.executeCommandandGetoutput(query).trim();
 		return Integer.valueOf(codeLines);

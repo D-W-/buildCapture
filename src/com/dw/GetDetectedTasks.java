@@ -210,12 +210,14 @@ public class GetDetectedTasks {
 //		得到 mutable 的array 必须得将 asList 得到的 list 再转化成 ArrayList
 		List<String> partStrings = new ArrayList<String>(Arrays.asList(line.split("\\s+")));
 		for(int i = 1;i<partStrings.size();++i){
-			if(partStrings.get(i).charAt(0) == '-'){
-				if(hasInput(partStrings.get(i)))
+			String partString = partStrings.get(i);
+			if(partString.charAt(0) == '-'){
+				if(hasInput(partString))
 					++i;
 				continue;
 			}
-			partStrings.set(i, toAbsolutePath(currentFolder, partStrings.get(i)));
+			partString = toAbsolutePath(currentFolder, partString);
+			partStrings.set(i, partString);
 			inputfileNumberInParts.add(i);
 		}
 		return partStrings;
@@ -224,6 +226,9 @@ public class GetDetectedTasks {
 	public String getTasks(String line,String currentFolder){
 //		输入是一个会得到可执行文件的指令,需要更改这个指令,并把所有需要的 .i 文件放到一个文件夹里面
 		taskNumber++;
+		if(taskNumber == 6) {
+			System.out.println("");
+		}
 		String result = "";
 		String taskName = "";
 		String folder = outFolder + "/task" + String.valueOf(taskNumber);
@@ -321,11 +326,16 @@ public class GetDetectedTasks {
 				continue;
 			matcher = pattern_sorcefileSuffix.matcher(tempString);
 			if(!matcher.find()){
-				if(!tempString.startsWith("/usr/lib") && !tempString.endsWith("i")) {
-//					输入文件有不能找到匹配的文件(.o不能对应.i), task 生成失败
-					taskNumber--;
-					Execute.executeCommand("rm -r " + folder);
-					return result + " Failed. ";
+//				输入文件有不能找到匹配的文件(.o不能对应.i), task 生成失败
+				if(!tempString.endsWith("i")) {
+					if(tempString.startsWith("/usr/lib")) {
+						continue;
+					}
+//					保留残余的task
+					continue;
+//					taskNumber--;
+//					Execute.executeCommand("rm -r " + folder);
+//					return result + " Failed. ";
 				}
 //				提取后缀
 				iter = tempString.length()-1;
