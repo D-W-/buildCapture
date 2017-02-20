@@ -6,18 +6,34 @@ TODO: 等有时间根据现在的工程修改一下现在的文档
 
 ## 使用
 
-### 1. 直接通过一个类来测试各个功能
+### 1. 引入jar包使用接口调用
 
-在 com.test 下面有测试类 MakefileProcessor 来测试各个功能
-这个类提供四个接口
+在 cn.harry 中提供了两个接口, 分别进行介绍
 
-1. `boolean run(String makeFolder, String outFolder)`: 传入工程根目录和想要输出的目录,执行工具,返回是否执行成功
-2. `HashMap<String, List<String>> getTaskPaths()`: 得到工具生成的所有task 的绝对路径以及每个 task里面所有 .i 文件的列表
-3. `void clean()`: 删除make产生的中间文件以及工具产生的 ProcessLog
-4. `boolean runCleanO(String makeFolder, String outFolder)` 执行工具,并清除make产生的中间文件(.o)
+1. `cn.harry.MakefileCapture` 执行抓取, 处理抓取信息的全部流程
+``` MakefileCapture captor = MakefileCaptureBuilder.getCaptor(projectDirectory, outputDirectory);
+    makefileCapture.make("make", "/bin/bash");
+    makefileCapture.clean();
+```
 
+第一句输入的`projectDirectory`是具有makefile的工程的根目录(可执行make的文件夹地址), `outputDirectory`是输出结果的指定目录, 默认生成到工程根目录下面的`.process_makefile`文件夹中
 
-### 2. 使用 jar 包来使用各个功能
+第二句输入的第一个参数是执行的make指令, 一般使用的都是`make`, 需要特殊参数可以加特殊参数, 第二个参数是指定执行make指令用的shell, 可以不指定, 有些项目使用`/bin/bash`, 有些使用`sh`, 这个暂时还没有固定的规律
+
+第三句等同于执行`make clean && rm -r .process_makefile`, 如果需要执行第二遍编译抓取, 可以用这个接口或者执行前面的指令
+
+2. `cn.harry.GetDetectedTasks` 只执行处理抓取信息的流程
+
+对有makefile的文件夹抓取过之后, 可以只抓取一次, 然后每次调用这个接口就可以多次处理抓取信息
+
+```
+        GetDetectedTasks getDetectTasks = new GetDetectedTasks(makefolder,makefolder + "/.process_makefile");
+        getDetectTasks.deal();
+```
+
+第一句输入的参数第一个是是具有makefile的工程的根目录(可执行make的文件夹地址), 第二个是抓取到的结果存放的地址(`process_makefile`所在的地址)
+
+### 2. 使用 jar 包在命令行中使用各个功能
 
 将文件编译成 jar 包 
 使用 `java -jar test.jar command parameters ...` 运行

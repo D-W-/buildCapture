@@ -108,7 +108,7 @@ public class MakefileCapture {
 			
 //			对工程执行make，并抓取输出
 			String command = "cd " + makeFolder + " && " + makeCommand;
-			ParameterHandler parameterHandler = new ParameterHandler(outFolder);
+			ParameterHandler parameterHandler = new ParameterHandler(makeFolder, outFolder);
 			outFolder += "/.process_makefile";
 			File rootFolder = new File(outFolder);
 			try {

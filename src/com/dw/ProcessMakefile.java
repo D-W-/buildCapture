@@ -22,7 +22,7 @@ public class ProcessMakefile {
 			}
 			
 			String outFolder = makeFolder;
-			ParameterHandler parameterHandler = new ParameterHandler(outFolder);
+			ParameterHandler parameterHandler = new ParameterHandler(makeFolder, outFolder);
 			command = parameterHandler.extract(command);
 			outFolder = parameterHandler.getOutput();
 			if(outFolder.charAt(0) == '~'){

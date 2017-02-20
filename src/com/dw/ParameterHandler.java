@@ -28,11 +28,13 @@ public class ParameterHandler {
 	private static String pathPattern = "-path=[^ ]+";
 //	需要此工具处理的参数都放到这里面
 	private static HashMap<String,String> arguments;
-	private String folderName;
+	private String outputfolder;
+	private String inputfolder;
 	
-	public ParameterHandler(String folderString) {
+	public ParameterHandler(String inputFolder, String outputFolder) {
 		arguments = new HashMap<String,String>();
-		folderName = folderString;
+		this.outputfolder = outputFolder;
+		this.inputfolder = inputFolder;
 	}
 	
 	public String extract(String command){
@@ -72,13 +74,13 @@ public class ParameterHandler {
 		if(shell == null || shell.equals("")) {
 			shell = MakefileCapture.SHELL;
 		}
-		File tempFile = new File(folderName + "/Makefile");
+		File tempFile = new File(inputfolder + "/Makefile");
 //		判断makefile or Makefile
 		if(tempFile.exists()){
-			command = command + (" \"SHELL=" + shell + " -xv\" -f Makefile &> " + folderName + "/.process_makefile/all ");
+			command = command + (" \"SHELL=" + shell + " -xv\" -f Makefile &> " + outputfolder + "/.process_makefile/all ");
 //					+ folderName + "/.process_makefile/output");
 		} else {
-			command = command + (" \"SHELL=" + shell + " -xv\" -f makefile &> " + folderName + "/.process_makefile/all " );
+			command = command + (" \"SHELL=" + shell + " -xv\" -f makefile &> " + outputfolder + "/.process_makefile/all " );
 //					+ folderName + "/.process_makefile/output");
 		}
 		String[] commands = {command};
@@ -103,7 +105,7 @@ public class ParameterHandler {
  */
 	public void filterCapturedFiles() {
 //		rename all to output and store output to output.old
-		String outputfileName = folderName + "/.process_makefile/output";
+		String outputfileName = outputfolder + "/.process_makefile/output";
 		
 		File outputfile = new File(outputfileName);
 		try {
@@ -112,7 +114,7 @@ public class ParameterHandler {
 			throw new RuntimeException(e1.toString());
 		}
 		
-		String allName = folderName + "/.process_makefile/all";
+		String allName = outputfolder + "/.process_makefile/all";
 		
 		Pattern startWithPlus = Pattern.compile("^\\+* ");
 		Pattern pattern_startWithArCC = Pattern.compile("^\\s*([/a-z0-9-_]*-)?(g?cc|ar) ");
@@ -159,19 +161,19 @@ public class ParameterHandler {
 	public String getOutput(){
 //		查看用户是否指定输出,没有指定就返回 null
 		if(arguments.containsKey("-mko")){
-			this.folderName = arguments.get("-mko");
+			this.outputfolder = arguments.get("-mko");
 		} 
-		return this.folderName;
+		return this.outputfolder;
 	}
 	
 	public static void mainTest(String[] args) {
-		String command = "";
-		for(int i = 0;i<args.length;++i){
-			command += " ";
-			command += args[i];
-		}
-		ParameterHandler outerShell = new ParameterHandler(".process_makefile");
-		command = outerShell.extract(command);
-		outerShell.make(command);
+//		String command = "";
+//		for(int i = 0;i<args.length;++i){
+//			command += " ";
+//			command += args[i];
+//		}
+//		ParameterHandler outerShell = new ParameterHandler(".process_makefile");
+//		command = outerShell.extract(command);
+//		outerShell.make(command);
 	}
 }

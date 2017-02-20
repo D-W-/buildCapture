@@ -58,7 +58,7 @@ public class MakefileProcessor{
 			_outFolder = outFolder;
 			
 			String command = "cd " + makeFolder + " && make";
-			ParameterHandler parameterHandler = new ParameterHandler(outFolder);
+			ParameterHandler parameterHandler = new ParameterHandler(makeFolder, outFolder);
 			outFolder += "/.process_makefile";
 			File rootFolder = new File(outFolder);
 			rootFolder.mkdir();
