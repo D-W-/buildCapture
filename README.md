@@ -47,12 +47,13 @@ TODO: 等有时间根据现在的工程修改一下现在的文档
 
 1. line文件夹: 里面保存各行输出的 `.i` 文件
 2. task文件夹: 里面保存输出可执行程序需要的所有 `.i` 文件
-3. output: 保存make的输出结果(只保存stdout), 如果进行了打开静默开关的抓取, make的所有内容会保存在这里
-4. outputParse: 保存转化后的各个命令
-5. fileMap: 各种 .o .c 等文件的 **绝对路经** 与 .i 文件的 **绝对路径** 的对应关系
-6. libMap: 各种动态静态链接库的 **绝对路径** 与 .o 文件的 **绝对路径**的对应关系
-7. all: 保存make输出的所有内容(包括stdout和stderr)
-8. output.old: 如果进行了打开静默开关的抓取, make的stdout会保存在这里
+3. all: 保存make输出的所有内容(包括stdout和stderr), 如果进行了打开静默开关的抓取, make的所有内容会保存在这里
+4. output: 对all里面结果过滤后的结果, 只有gcc命令以及文件夹切换的命令
+5. outputParse: 保存对`output`文件转化后的各个命令
+6. fileMap: 各种 .o .c 等文件的 **绝对路经** 与 .i 文件的 **绝对路径** 的对应关系
+7. libMap: 各种动态静态链接库的 **绝对路径** 与 .o 文件的 **绝对路径**的对应关系
+8. tasks.json: 最终结果输出的文件, 包括每个task有哪些文件, 行数统计等信息, 通过`cn.harry.captor.MakefileCapture.MakefileCapture.getTasksFromJson("location/of/tasks.json")`将json文件恢复为Tasks类
+
 
 ---
 
