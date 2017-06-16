@@ -53,12 +53,12 @@ public class SourceLocationMapper {
 	}
 	
 	public static void main(String[] args){
-		SourceLocationMapper sourceLocationMapper = new SourceLocationMapper("/home/harry/Desktop/process_makefile/test.i");
+		SourceLocationMapper sourceLocationMapper = new SourceLocationMapper("/home/harry/Desktop/grep.o.i");
 //		测试
 		sourceLocationMapper.load();
 //		System.out.println(getRange());
-		System.out.println(sourceLocationMapper.resolve(946));
-		System.out.println(sourceLocationMapper.resolve(946));
-		System.out.println(sourceLocationMapper.getRange());
+//		System.out.println(sourceLocationMapper.resolve(946));
+		System.out.println(sourceLocationMapper.resolve(10478));
+//		System.out.println(sourceLocationMapper.getRange());
 	}
 }

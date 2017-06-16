@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Stack;
 
+import com.google.common.primitives.UnsignedBytes;
 import com.mapping.SourceOriginMapping;
 import com.not.so.common.Pair;
 
@@ -128,8 +129,12 @@ public class TextCorresponding {
 				}
 				return ;
 			}
-			
-			int lineNumber = Integer.valueOf(parts[1]);
+			int lineNumber = 0;
+			try {
+				lineNumber = Integer.valueOf(parts[1]);
+			} catch (NumberFormatException e) {
+				return;
+			}
 			String filePath = parts[2].substring(1, parts[2].length()-1);
 //			转换绝对路径
 			if(filePath.charAt(0) != '/'){
