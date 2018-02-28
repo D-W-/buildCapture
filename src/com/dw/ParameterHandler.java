@@ -77,16 +77,16 @@ public class ParameterHandler {
 		File tempFile = new File(inputfolder + "/Makefile");
 //		判断makefile or Makefile
 		if(tempFile.exists()){
-			command = command + (" \"SHELL=" + shell + " -xv\" -f Makefile &> " + outputfolder + "/.process_makefile/all ");
-//					+ folderName + "/.process_makefile/output");
+//			command = command + (" \"SHELL=" + shell + " -xv\" -f Makefile &> " + outputfolder + "/.process_makefile/all ");
+			command = command + (" >" + outputfolder + "/.process_makefile/output ");
 		} else {
-			command = command + (" \"SHELL=" + shell + " -xv\" -f makefile &> " + outputfolder + "/.process_makefile/all " );
-//					+ folderName + "/.process_makefile/output");
+//			command = command + (" \"SHELL=" + shell + " -xv\" -f makefile &> " + outputfolder + "/.process_makefile/all " );
+      command = command + (" >" + outputfolder + "/.process_makefile/output ");
 		}
 		String[] commands = {command};
 		boolean result = Execute.executeCommands(commands);
 		if(result) {
-			filterCapturedFiles();
+//			filterCapturedFiles();
 			return true;
 		}
 		else {
@@ -125,19 +125,26 @@ public class ParameterHandler {
 	         br = new BufferedReader(new FileReader(allName));
 	         bw = new BufferedWriter(new FileWriter(outputfileName));
 	         String line;
+//	         consider all gcc lines, may contains duplicate
 	         while ((line = br.readLine()) != null) {
 	            if (line.length() > 0) {
-	            	Matcher matcher = startWithPlus.matcher(line);
-	            	if(matcher.find()) {
+					Matcher matcher = pattern_startWithArCC.matcher(line);
+	            	if (line.startsWith("make")) {
+						bw.write(line+"\n");
+					}
+					else if (matcher.find()) {
+	            		bw.write(line + "\n");
+					} else {
+						matcher = startWithPlus.matcher(line);
+						if(matcher.find()) {
 //		        		去掉每行之前的加号
-	            		line = matcher.replaceAll("");
-	            		matcher = pattern_startWithArCC.matcher(line);
-	            		if(matcher.find()) {
-		            		bw.write(line+"\n");
-	            		}
-	            	} else if(line.startsWith("make")) {
-	            		bw.write(line+"\n");
-	            	}
+							line = matcher.replaceAll("");
+							matcher = pattern_startWithArCC.matcher(line);
+							if (matcher.find()) {
+								bw.write(line + "\n");
+							}
+						}
+					}
 	            }
 	         }
 	      } catch (Exception e) {
@@ -166,7 +173,7 @@ public class ParameterHandler {
 		return this.outputfolder;
 	}
 	
-	public static void mainTest(String[] args) {
+	public static void main(String[] args) {
 //		String command = "";
 //		for(int i = 0;i<args.length;++i){
 //			command += " ";
@@ -175,5 +182,8 @@ public class ParameterHandler {
 //		ParameterHandler outerShell = new ParameterHandler(".process_makefile");
 //		command = outerShell.extract(command);
 //		outerShell.make(command);
+		ParameterHandler parameterHandler = new ParameterHandler("/home/harry/Downloads/openssl-1.0.0a/", "/home/harry/Downloads/openssl-1.0.0a/");
+		parameterHandler.filterCapturedFiles();
+
 	}
 }

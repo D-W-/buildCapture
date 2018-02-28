@@ -223,12 +223,42 @@ public class GetDetectedTasks {
 		return partStrings;
 	}
 	
+	public void getOpensslTask(String line, String currentFolder) {
+		taskNumber++;
+
+		String folder = outFolder + "/task" + String.valueOf(taskNumber);
+		File dirFile = new File(folder);
+		dirFile.mkdir();
+		
+//		记录一下task文件夹里面的 .i 文件
+		String[] parts = line.split("\"");
+		String inputs = parts[1];
+		String[] inputFiles = inputs.split("\\s+");
+		List<String> taskiFiles = new ArrayList<String>();
+		for (String inputFile : inputFiles) {
+		  taskiFiles.add(toAbsolutePath(currentFolder, inputFile));
+    }
+//		add lib files
+		taskiFiles.addAll(libMap.get(toAbsolutePath(currentFolder, "../libssl.a")));
+		taskiFiles.addAll(libMap.get(toAbsolutePath(currentFolder, "../libcrypto.a")));
+		List<String> files = new ArrayList<>();
+		for (String file : taskiFiles) {
+		  if (fileMap.containsKey(file))
+			  files.add(fileMap.get(file).getFirst());
+		  else
+		    System.out.println("NOOOOOOOOO-----------" + file);
+		}
+		List<String> commands = new ArrayList<>();
+		for (String file : files) {
+			commands.add("cp " + file + " " + folder);
+		}
+		Execute.executeCommands((String[])commands.toArray(new String[commands.size()]));
+	}
+	
 	public String getTasks(String line,String currentFolder){
 //		输入是一个会得到可执行文件的指令,需要更改这个指令,并把所有需要的 .i 文件放到一个文件夹里面
 		taskNumber++;
-		if(taskNumber == 6) {
-			System.out.println("");
-		}
+
 		String result = "";
 		String taskName = "";
 		String folder = outFolder + "/task" + String.valueOf(taskNumber);
@@ -376,13 +406,13 @@ public class GetDetectedTasks {
 //		输入是一个会得到中间输出文件的指令，需要修改这个指令，把所有的输出都变成 .i 的形式
 //		直接输出到 .o 文件所在的相同文件夹里,便于后面替换
 //		第二个参数可以指定 输出目标地址 必须是一个绝对路径
-		
+		line = line.replaceFirst("gcc", "clang-3.9");
 		String folder = outFolder + "/line" + String.valueOf(lineNumber);
 		File dirFile = new File(folder);
 		dirFile.mkdir();
 		String command = "";
 //		增加一个 -g 选项, 输出的时候输出一下当前编译的绝对路径
-		String result = line + " -E -g -O0";
+		String result = line.replaceAll("-c", " -O0 -S -Wno-everything -emit-llvm -g ");
 		if(outFileName.equals("")){		
 			Matcher matcher = pattern_out.matcher(result);
 			String changedFilename = "";
@@ -393,7 +423,7 @@ public class GetDetectedTasks {
 				while(iter >= 0 && outFileName.charAt(iter) != '/'){
 					--iter;
 				}
-				changedFilename = toAbsolutePath(folder, outFileName.substring(iter+1) + ".i");
+				changedFilename = toAbsolutePath(folder, outFileName.substring(iter+1) + ".ll");
 				result = matcher.replaceAll("-o " + changedFilename + " ");
 			} else{
 //				没指定输出名称,这时 gcc 会默认输入名称加 .o 或者 .s 为输出名称
@@ -425,6 +455,9 @@ public class GetDetectedTasks {
 	public void getLibMap(String line,String currentFolder){
 //		处理 ar 指令,提取出输入文件 .o 和输出文件 .a 存绝对路径
 //		bugFix: should split with multiple spaces
+//    corner case: ar command in if braces: ar  r ../../libcrypto.a e_gost_err.o ; \
+    line = line.replaceAll(";\\s+\\\\","");
+    line = line.trim();
 		String[] partStrings = line.split("\\s+");
 		if(partStrings.length < 4){
 			return ;
@@ -437,7 +470,10 @@ public class GetDetectedTasks {
 			inputFilenames.add(toAbsolutePath(currentFolder, partStrings[iter]));
 			++iter;
 		}
-		libMap.put(outputFilename, inputFilenames);
+		if (libMap.containsKey(outputFilename))
+		  libMap.get(outputFilename).addAll(inputFilenames);
+		else
+		  libMap.put(outputFilename, inputFilenames);
 	}
 	
 	public void getSharedMap(String line, String currentFolder){
@@ -504,10 +540,10 @@ public class GetDetectedTasks {
 				return result;
 			}
 //			处理得到可执行文件的情况
-			matcher = pattern_nonExecutive.matcher(line);
-			if(!matcher.find()){
-				return getTasks(line,currentFolder);
-			}
+//			matcher = pattern_nonExecutive.matcher(line);
+//			if(!matcher.find()){
+//				return getTasks(line,currentFolder);
+//			}
 		}
 		
 //		处理 ar 命令的情况
@@ -517,6 +553,11 @@ public class GetDetectedTasks {
 			return result;
 		}
 		
+		Pattern patternOpenssl = Pattern.compile("^\\s*APPNAME=openssl.*");
+		matcher = patternOpenssl.matcher(line);
+		if (matcher.find()) {
+			getOpensslTask(line, currentFolder);
+		}
 //		其他情况不做处理,返回空行
 		return result;
 	}
@@ -555,11 +596,24 @@ public class GetDetectedTasks {
 //		String line = "gcc-7 -c -DSTDC_HEADERS=1 -DHAVE_UNISTD_H=1 -DDIRENT=1 -O gzip.c";
 //		Matcher matcher = pattern_startWithCC.matcher(line);
 //		System.out.println(matcher.matches());
-		String line = "ar  r ../libcrypto.a cryptlib.o mem.o mem_dbg.o cversion.o ex_data.o cpt_err.o ebcdic.o uid.o o_time.o o_str.o o_dir.o mem_clr.o";
-		String[] partStrings = line.split("\\s+");
-		for (String a : partStrings) {
-			System.out.println(a);
-		}
+//		String line = "ar  r ../libcrypto.a cryptlib.o mem.o mem_dbg.o cversion.o ex_data.o cpt_err.o ebcdic.o uid.o o_time.o o_str.o o_dir.o mem_clr.o";
+//		String[] partStrings = line.split("\\s+");
+//		for (String a : partStrings) {
+//			System.out.println(a);
+//		}
+//		Pattern pattern = Pattern.compile("^\\s*APPNAME=openssl.*");
+//		String line = "	APPNAME=openssl OBJECTS=\"openssl.o verify.o asn1pars.o req.o dgst.o dh.o dhparam.o enc.o passwd.o gendh.o errstr.o ca.o pkcs7.o crl2p7.o crl.o rsa.o rsautl.o dsa.o dsaparam.o ec.o ecparam.o x509.o genrsa.o gendsa.o genpkey.o s_server.o s_client.o speed.o s_time.o apps.o s_cb.o s_socket.o app_rand.o version.o sess_id.o ciphers.o nseq.o pkcs12.o pkcs8.o pkey.o pkeyparam.o pkeyutl.o spkac.o smime.o cms.o rand.o engine.o ocsp.o prime.o ts.o\" \\";
+//		System.out.println(pattern.matcher(line).matches());
+//		String[] partStrings = line.split("\"");
+//		for (String a : partStrings) {
+//			System.out.println(a);
+//		}
+//		String folder = "/home/harry/Downloads/openssl-1.0.0a/.process_makefile";
+//		GetDetectedTasks getDetectedTasks = new GetDetectedTasks(folder, folder);
+//		getDetectedTasks.deal();
+//		System.out.println(getDetectedTasks.toAbsolutePath("/home/harry/code", "../twistd.log"));
+	  String line = "\tar  r ../../libcrypto.a e_gost_err.o gost2001_keyx.o gost2001.o gost89.o gost94_keyx.o gost_ameth.o gost_asn1.o gost_crypt.o gost_ctl.o gost_eng.o gosthash.o gost_keywrap.o gost_md.o gost_params.o gost_pmeth.o gost_sign.o; \\\n";
+	  System.out.println(line.replaceAll(";\\s+\\\\",""));
 	}
 
 }
