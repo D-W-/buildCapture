@@ -424,7 +424,8 @@ public class GetDetectedTasks {
 	
 	public void getLibMap(String line,String currentFolder){
 //		处理 ar 指令,提取出输入文件 .o 和输出文件 .a 存绝对路径
-		String[] partStrings = line.split(" ");
+//		bugFix: should split with multiple spaces
+		String[] partStrings = line.split("\\s+");
 		if(partStrings.length < 4){
 			return ;
 		}
@@ -548,4 +549,17 @@ public class GetDetectedTasks {
 	public void setMacros(String macros) {
 		this.macros = macros;
 	}
+
+	public static void main(String[] args) {
+//		Pattern pattern_startWithCC = Pattern.compile("^\\s*([/a-z0-9-_]*-)?g?cc.*");
+//		String line = "gcc-7 -c -DSTDC_HEADERS=1 -DHAVE_UNISTD_H=1 -DDIRENT=1 -O gzip.c";
+//		Matcher matcher = pattern_startWithCC.matcher(line);
+//		System.out.println(matcher.matches());
+		String line = "ar  r ../libcrypto.a cryptlib.o mem.o mem_dbg.o cversion.o ex_data.o cpt_err.o ebcdic.o uid.o o_time.o o_str.o o_dir.o mem_clr.o";
+		String[] partStrings = line.split("\\s+");
+		for (String a : partStrings) {
+			System.out.println(a);
+		}
+	}
+
 }
