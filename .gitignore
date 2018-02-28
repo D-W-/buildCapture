@@ -6,3 +6,11 @@
 .project
 
 # guava*
+guava*
+gson*
+# idea
+.idea/
+
+Build-capture.iml
+
+out/
