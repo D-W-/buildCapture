@@ -27,9 +27,9 @@ public class Task {
 		for(int i = 0; i < files.size(); ++i) {
 			String file = rootDir + File.separator + files.get(i);
 			this.files.add(file);
-			int lineNumber = fileLineNumber(file);
-			allCodeLinesAfterProcess += lineNumber;
-			linesAfterProcess.add(lineNumber);
+//			int lineNumber = fileLineNumber(file);
+//			allCodeLinesAfterProcess += lineNumber;
+//			linesAfterProcess.add(lineNumber);
 		}
 	}
 	

@@ -44,7 +44,7 @@ public class GetDetectedTasks {
 	Pattern pattern_cS = Pattern.compile(" -[cS] ");
 	Pattern pattern_nonExecutive = Pattern.compile(" -[cSE] ");
 //	开头不一定是gcc 也可能是带选项的gcc
-	Pattern pattern_startWithCC = Pattern.compile("^\\s*([/a-z0-9-_]*-)?g?cc.*");
+	Pattern pattern_startWithCC = Pattern.compile("^\\s*([/a-z0-9-_]*-)?(g?cc|clang).*");
 	Pattern pattern_out = Pattern.compile("-o\\s+([^\\s]+)");
 	Pattern pattern_filename = Pattern.compile(" (([^ ]+)\\.[c|cc|C|cxx|cpp])");
 	Pattern pattern_sorcefileSuffix = Pattern.compile(".[c|cc|C|cxx|cpp]$");
@@ -357,7 +357,7 @@ public class GetDetectedTasks {
 			matcher = pattern_sorcefileSuffix.matcher(tempString);
 			if(!matcher.find()){
 //				输入文件有不能找到匹配的文件(.o不能对应.i), task 生成失败
-				if(!tempString.endsWith("i")) {
+				if(!tempString.endsWith("ll")) {
 					if(tempString.startsWith("/usr/lib")) {
 						continue;
 					}
@@ -406,13 +406,22 @@ public class GetDetectedTasks {
 //		输入是一个会得到中间输出文件的指令，需要修改这个指令，把所有的输出都变成 .i 的形式
 //		直接输出到 .o 文件所在的相同文件夹里,便于后面替换
 //		第二个参数可以指定 输出目标地址 必须是一个绝对路径
-		line = line.replaceFirst("gcc", "clang-3.9");
+//		line = line.replaceFirst("gcc", "clang-3.9");
+		Pattern p = Pattern.compile("^\\s*([/a-z0-9-_]*-)?g?cc +");
+		Matcher m = p.matcher(line);
+		line = m.replaceFirst("clang-3.9 ");
 		String folder = outFolder + "/line" + String.valueOf(lineNumber);
 		File dirFile = new File(folder);
 		dirFile.mkdir();
 		String command = "";
 //		增加一个 -g 选项, 输出的时候输出一下当前编译的绝对路径
-		String result = line.replaceAll("-c", " -O0 -S -Wno-everything -emit-llvm -g ");
+		String result;
+		line = line.replaceAll(" -g ", "");
+//		if (line.contains(" -c "))
+//			result = line.replaceAll(" -c ", " -O0 -S -Wno-everything -emit-llvm -c ");
+//		else
+		result = line + " -O0 -S -Wno-everything -emit-llvm ";
+		result = result.replaceAll("-fno-guess-branch-probability", "");
 		if(outFileName.equals("")){		
 			Matcher matcher = pattern_out.matcher(result);
 			String changedFilename = "";
@@ -444,7 +453,7 @@ public class GetDetectedTasks {
 			fileMap.put(outFileName, new Pair(changedFilename,lineNumber));
 				
 		} else {
-			result += (" -o " + outFileName); 
+			result += (" -o " + outFileName + ".ll");
 		}
 		command += result;
 		executeCommand(command);
@@ -528,9 +537,13 @@ public class GetDetectedTasks {
 			if(line.endsWith("'")){
 				return result;
 			}
+			if (line.contains("-o /dev/null")) {
+			  return "";
+      }
 //			处理 -c -S 的情况
 			matcher = pattern_cS.matcher(line);
 			if(matcher.find()){
+//				line = matcher.replaceAll("clang-3.9");
 				return getPreprocessedFiles(line,currentFolder,"");
 			}		
 //			处理 -shared 命令的情况
@@ -540,10 +553,10 @@ public class GetDetectedTasks {
 				return result;
 			}
 //			处理得到可执行文件的情况
-//			matcher = pattern_nonExecutive.matcher(line);
-//			if(!matcher.find()){
-//				return getTasks(line,currentFolder);
-//			}
+			matcher = pattern_nonExecutive.matcher(line);
+			if(!matcher.find()){
+				return getTasks(line,currentFolder);
+			}
 		}
 		
 //		处理 ar 命令的情况
@@ -608,12 +621,15 @@ public class GetDetectedTasks {
 //		for (String a : partStrings) {
 //			System.out.println(a);
 //		}
-//		String folder = "/home/harry/Downloads/openssl-1.0.0a/.process_makefile";
+//		String folder = "/home/harry/testCases/mutt/mutt/.process_makefile";
 //		GetDetectedTasks getDetectedTasks = new GetDetectedTasks(folder, folder);
 //		getDetectedTasks.deal();
-//		System.out.println(getDetectedTasks.toAbsolutePath("/home/harry/code", "../twistd.log"));
-	  String line = "\tar  r ../../libcrypto.a e_gost_err.o gost2001_keyx.o gost2001.o gost89.o gost94_keyx.o gost_ameth.o gost_asn1.o gost_crypt.o gost_ctl.o gost_eng.o gosthash.o gost_keywrap.o gost_md.o gost_params.o gost_pmeth.o gost_sign.o; \\\n";
-	  System.out.println(line.replaceAll(";\\s+\\\\",""));
+		Pattern pattern_startWithCC = Pattern.compile("^\\s*([/a-z0-9-_]*-)?g?cc +");
+		String line = "cc -c lll.c";
+		Matcher matcher = pattern_startWithCC.matcher(line);
+		System.out.println(matcher.replaceFirst("clang"));
+
+
 	}
 
 }
